@@ -20,7 +20,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 .legend{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:10px;z-index:900;background:rgba(16,22,26,.88);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px}
 .legend div{display:flex;align-items:center;gap:8px;margin:3px 0}
 .legend i{display:inline-block;width:26px;height:5px;border-radius:3px}
-body.drawing .legend,body.measuring .legend{display:none}
+body.drawing .legend,body.measuring .legend,body.adjusting .legend{display:none}
 .mlabel span{display:inline-block;transform:translate(-50%,-50%);white-space:nowrap;background:rgba(255,234,0,.95);color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:5px;border:1px solid #000}
 .plabel span{display:inline-block;transform:translate(-50%,-50%);white-space:nowrap;background:rgba(10,14,16,.85);color:#fff;font-weight:700;font-size:12px;padding:2px 6px;border-radius:6px;border:2px solid #fff}
 .nodeic i{position:absolute;left:-6px;top:-6px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid #111}
@@ -86,6 +86,14 @@ input[type=text],input[type=number],select{width:100%;min-height:46px;border-rad
   .pstage{overflow:visible;padding:0}
   .pstage svg{min-width:0;width:var(--pw);height:var(--ph);box-shadow:none}
 }
+.lmic svg{position:absolute;left:-17px;top:-17px;overflow:visible}
+.lmic b{position:absolute;left:0;top:19px;transform:translateX(-50%);white-space:nowrap;font:700 12px system-ui,sans-serif;color:#fff;background:rgba(10,14,16,.9);padding:1px 6px;border-radius:5px;border:1px solid #fff}
+.sec{padding:10px 6px 2px;color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase;border-top:1px solid var(--line)}
+.leaflet-bar a#btnGps,.leaflet-bar a#btnAdjust{font-size:20px;line-height:30px;text-align:center;text-decoration:none;color:#222}
+.adjic i{position:absolute;left:-16px;top:-16px;width:32px;height:32px;box-sizing:border-box;border-radius:50%;background:rgba(61,220,151,.35);border:3px solid #3ddc97}
+.adjic i::after{content:"";position:absolute;left:8px;top:8px;width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid #111;box-sizing:border-box}
+.adjic b{position:absolute;left:18px;top:-30px;font:700 12px system-ui,sans-serif;color:#fff;background:rgba(10,14,16,.9);padding:1px 6px;border-radius:5px;white-space:nowrap}
+.adjlm svg{position:absolute;left:-19px;top:-19px;overflow:visible;filter:drop-shadow(0 0 3px #3ddc97)}
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#fff;color:#111;padding:10px 16px;border-radius:999px;font-size:14px;font-weight:600;z-index:6000;display:none;max-width:92%;text-align:center}
 .leaflet-popup-content{font-size:14px;line-height:1.4}
 .leaflet-popup-content button{margin:6px 6px 0 0;min-height:36px;padding:0 12px;border-radius:8px;border:1px solid #bbb;background:#fff}
@@ -103,9 +111,17 @@ input[type=text],input[type=number],select{width:100%;min-height:46px;border-rad
 
 <div class="bar" id="barIdle">
   <button class="primary" id="btnDraw">Draw pipe</button>
+  <button id="btnLandmark">Landmark</button>
   <button id="btnMeasure">Measure</button>
-  <button id="btnGps">My location</button>
   <button id="btnList">Pipes (<span id="cnt">0</span>)</button>
+</div>
+<div class="bar" id="barAdj" style="display:none">
+  <button id="btnAUndo">Undo move</button>
+  <button class="primary" id="btnADone">Done</button>
+</div>
+<div class="bar" id="barPlace" style="display:none">
+  <button id="btnPlaceGps">Use my location</button>
+  <button class="danger" id="btnPlaceCancel">Cancel</button>
 </div>
 <div class="bar" id="barMeas" style="display:none">
   <button id="btnMUndo">Undo</button>
@@ -179,6 +195,29 @@ input[type=text],input[type=number],select{width:100%;min-height:46px;border-rad
   </div>
 </div>
 
+<div class="modalwrap" id="lmWrap">
+  <div class="modal" role="dialog" aria-labelledby="lmTitleH">
+    <h2 id="lmTitleH">New landmark</h2>
+    <label for="lmType">Type</label>
+    <select id="lmType">
+      <option value="ohsr">OHSR (overhead service reservoir)</option>
+      <option value="dps">DPS (direct pumping system)</option>
+      <option value="bore">Borewell</option>
+      <option value="sump">Sump / GLSR</option>
+      <option value="valve">Valve</option>
+      <option value="other">Other</option>
+    </select>
+    <label for="lmName">Title</label>
+    <input type="text" id="lmName" maxlength="40" placeholder="e.g. OHSR 50 KL, Main pumping station" autocomplete="off">
+    <label for="lmSize">Size</label>
+    <select id="lmSize"><option value="t">Tiny</option><option value="xs">Extra small</option><option value="s">Small</option><option value="m">Normal</option><option value="l">Large</option><option value="xl">Extra large</option></select>
+    <div class="acts">
+      <button id="lmCancel">Cancel</button>
+      <button class="primary" id="lmSave">Save landmark</button>
+    </div>
+  </div>
+</div>
+
 <div id="printView">
   <div class="ptools">
     <input type="text" id="pTitle" aria-label="Header title" placeholder="Title, e.g. Village name water supply scheme">
@@ -186,6 +225,8 @@ input[type=text],input[type=number],select{width:100%;min-height:46px;border-rad
     <input type="text" id="pBy" aria-label="Prepared by" placeholder="Prepared by (name / designation)">
     <select id="pArea" aria-label="Area to print"><option value="all">Area: whole map</option><option value="view">Area: map view / dragged box</option></select>
     <button id="pPick">Drag a box on the map</button>
+    <select id="pLm" aria-label="Landmarks on print"><option value="on">Landmarks: shown</option><option value="off">Landmarks: hidden</option></select>
+    <select id="pLmSize" aria-label="Landmark size on print"><option value="1">Landmark size: as set</option><option value="0.35">Landmark size: tiny</option><option value="0.5">Landmark size: extra small</option><option value="0.7">Landmark size: smaller</option><option value="1.4">Landmark size: larger</option><option value="1.9">Landmark size: much larger</option></select>
     <select id="pArrow" aria-label="Direction arrows"><option value="on">Arrows: on</option><option value="off">Arrows: off</option></select>
     <select id="pNodes" aria-label="Nodes on print"><option value="names">Nodes: circles + names</option><option value="circles">Nodes: circles only</option><option value="none">Nodes: hidden</option></select>
     <select id="pLbl" aria-label="Pipe labels on print"><option value="both">Labels: dia | length</option><option value="len">Labels: length only</option><option value="none">Labels: none</option></select>
@@ -221,6 +262,26 @@ var DIAS=["2","2.5","3","5"];
 var PWID={"2":0.7,"2.5":0.9,"3":1.1,"5":1.5};
 var KEY2="pipeline-mapper-v2",KEY1="pipeline-mapper-v1",HKEY="pipeline-mapper-header";
 var SNAP_PX=24,NODE_TOL=2.5;
+var TYPES={
+  ohsr:{label:"OHSR",full:"Overhead Service Reservoir",shape:"square",color:"#00897b",ch:"O"},
+  dps:{label:"DPS",full:"Direct Pumping System",shape:"diamond",color:"#6a1b9a",ch:"D"},
+  bore:{label:"Borewell",full:"Borewell",shape:"circle",color:"#1565c0",ch:"B"},
+  sump:{label:"Sump",full:"Sump / GLSR",shape:"hex",color:"#ef6c00",ch:"S"},
+  valve:{label:"Valve",full:"Valve",shape:"triangle",color:"#c62828",ch:"V"},
+  other:{label:"Other",full:"Other",shape:"circle",color:"#546e7a",ch:"\u2022"}
+};
+var LM_SIZES={t:0.35,xs:0.5,s:0.7,m:1,l:1.4,xl:1.9};
+function lmMul(l){return LM_SIZES[l.size]||1}
+function lmShape(type,x,y,r,fsz,sw,stroke){
+  var T=TYPES[type]||TYPES.other,a=' fill="'+T.color+'" stroke="'+stroke+'" stroke-width="'+sw+'" stroke-linejoin="round"',sh,k,pts=[];
+  if(T.shape==="square")sh='<rect x="'+f2(x-r)+'" y="'+f2(y-r)+'" width="'+f2(2*r)+'" height="'+f2(2*r)+'"'+a+'/>';
+  else if(T.shape==="diamond")sh='<polygon points="'+f2(x)+','+f2(y-1.35*r)+' '+f2(x+1.35*r)+','+f2(y)+' '+f2(x)+','+f2(y+1.35*r)+' '+f2(x-1.35*r)+','+f2(y)+'"'+a+'/>';
+  else if(T.shape==="triangle")sh='<polygon points="'+f2(x)+','+f2(y-1.3*r)+' '+f2(x+1.25*r)+','+f2(y+0.95*r)+' '+f2(x-1.25*r)+','+f2(y+0.95*r)+'"'+a+'/>';
+  else if(T.shape==="hex"){for(k=0;k<6;k++)pts.push(f2(x+1.15*r*Math.cos(k*Math.PI/3))+","+f2(y+1.15*r*Math.sin(k*Math.PI/3)));sh='<polygon points="'+pts.join(" ")+'"'+a+'/>'}
+  else sh='<circle cx="'+f2(x)+'" cy="'+f2(y)+'" r="'+f2(1.1*r)+'"'+a+'/>';
+  if(!fsz)return sh;
+  return sh+'<text x="'+f2(x)+'" y="'+f2(y+fsz*(T.shape==="triangle"?0.55:0.35))+'" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="'+fsz+'" font-weight="700" fill="#fff">'+T.ch+'</text>';
+}
 
 /* ---------- helpers ---------- */
 function $(id){return document.getElementById(id)}
@@ -243,9 +304,9 @@ function labelText(p){return p.dia+"\" | "+Math.round(p.length)+" m"}
 function colorKey(p){return p.color&&PAL[p.color]?p.color:STATUS[p.status||"existing"].key}
 
 /* ---------- state ---------- */
-var pipes=[],nodes=[],prefix="",nextNo=1,sourceId="",createdIds=[];
+var pipes=[],nodes=[],landmarks=[],prefix="",nextNo=1,sourceId="",createdIds=[];
 function save(){
-  try{localStorage.setItem(KEY2,JSON.stringify({v:2,pipes:pipes,nodes:nodes,prefix:prefix,next:nextNo,source:sourceId}))}
+  try{localStorage.setItem(KEY2,JSON.stringify({v:2,pipes:pipes,nodes:nodes,landmarks:landmarks,prefix:prefix,next:nextNo,source:sourceId}))}
   catch(e){toast("Could not save in this browser. Download a backup.")}
 }
 function nameTaken(n){var l=String(n).toLowerCase();return nodes.some(function(x){return String(x.name).toLowerCase()===l})}
@@ -360,6 +421,7 @@ function setState(obj){
   nextNo=(!Array.isArray(obj)&&obj&&obj.next)||1;
   nodes.forEach(function(n){n.name=String(n.name)});
   sourceId=(!Array.isArray(obj)&&obj&&obj.source)||"";
+  landmarks=(!Array.isArray(obj)&&obj&&Array.isArray(obj.landmarks))?obj.landmarks.filter(function(l){return l&&l.id&&TYPES[l.type]&&isFinite(l.lat)&&isFinite(l.lng)}):[];
   pipes=[];
   list.forEach(function(p){var q=normalizePipe(p);if(q)pipes.push(q)});
   pruneNodes();
@@ -381,10 +443,28 @@ var esri=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World
 var osm=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:21,maxNativeZoom:19,attribution:"&copy; OpenStreetMap"});
 L.control.layers({"Google satellite + names":gHybrid,"Google satellite":gSat,"Esri satellite":esri,"Street":osm},{},{position:"topleft"}).addTo(map);
 L.control.zoom({position:"topleft"}).addTo(map);
+var GpsCtl=L.Control.extend({options:{position:"topleft"},onAdd:function(){
+  var c=L.DomUtil.create("div","leaflet-bar"),a=L.DomUtil.create("a","",c);
+  a.href="#";a.id="btnGps";a.title="My location";a.setAttribute("role","button");a.setAttribute("aria-label","My location");a.innerHTML="&#9678;";
+  L.DomEvent.disableClickPropagation(c);
+  L.DomEvent.on(a,"click",function(e){L.DomEvent.preventDefault(e)});
+  return c;
+}});
+new GpsCtl().addTo(map);
+var AdjCtl=L.Control.extend({options:{position:"topleft"},onAdd:function(){
+  var c=L.DomUtil.create("div","leaflet-bar"),a=L.DomUtil.create("a","",c);
+  a.href="#";a.id="btnAdjust";a.title="Move nodes";a.setAttribute("role","button");a.setAttribute("aria-label","Move nodes");a.innerHTML="&#10021;";
+  L.DomEvent.disableClickPropagation(c);
+  L.DomEvent.on(a,"click",function(e){L.DomEvent.preventDefault(e)});
+  return c;
+}});
+new AdjCtl().addTo(map);
 L.control.scale({imperial:false,position:"bottomleft"}).addTo(map);
 
 var pipeLayer=L.layerGroup().addTo(map);
+var pipeLayers={};
 var nodeLayer=L.layerGroup().addTo(map);
+var lmLayer=L.layerGroup().addTo(map);
 var drawing=false;
 
 loadState();
@@ -424,20 +504,100 @@ function drawNodes(){
   });
 }
 
+/* ---------- landmarks ---------- */
+function drawLandmarks(){
+  lmLayer.clearLayers();
+  landmarks.forEach(function(l){
+    var t=l.title||TYPES[l.type].label;
+    L.marker([l.lat,l.lng],{interactive:false,keyboard:false,zIndexOffset:500,icon:L.divIcon({className:"lmic",html:'<svg width="'+Math.round(34*lmMul(l))+'" height="'+Math.round(34*lmMul(l))+'" viewBox="-3.4 -3.4 6.8 6.8" style="left:-'+Math.round(17*lmMul(l))+'px;top:-'+Math.round(17*lmMul(l))+'px">'+lmShape(l.type,0,0,2.1,lmMul(l)<0.6?0:2.7,0.35,"#fff")+'</svg><b style="top:'+Math.round(17*lmMul(l)+3)+'px;font-size:'+f2(12*Math.max(0.85,Math.min(1.4,Math.sqrt(lmMul(l)))))+'px">'+esc(t)+'</b>',iconSize:[0,0]})}).addTo(lmLayer);
+  });
+}
+function nearestLandmark(ll,px){
+  var pt=map.latLngToContainerPoint(ll),best=null,bd=px;
+  landmarks.forEach(function(l){
+    var d=pt.distanceTo(map.latLngToContainerPoint([l.lat,l.lng]));
+    if(d<bd){bd=d;best=l}
+  });
+  return best;
+}
+function openLandmarkPopup(l){
+  var d=document.createElement("div"),T=TYPES[l.type]||TYPES.other,nd=l.node?nodeById(l.node):null;
+  d.innerHTML="<b>"+esc(l.title||T.label)+"</b><br>"+esc(T.full)+(nd?"<br>At node "+esc(nd.name):"")+"<br>";
+  var e=document.createElement("button");e.textContent="Edit";
+  e.onclick=function(){map.closePopup();openLmForm(l.id)};
+  var x=document.createElement("button");x.textContent="Delete";
+  x.onclick=function(){
+    if(!confirm("Delete landmark "+(l.title||T.label)+"?"))return;
+    landmarks=landmarks.filter(function(q){return q.id!==l.id});save();map.closePopup();refreshAll();toast("Landmark deleted");
+  };
+  d.appendChild(e);d.appendChild(x);
+  L.popup().setLatLng([l.lat,l.lng]).setContent(d).openOn(map);
+}
+var placing=false,lmPending=null,lmEditId=null;
+function setPlacing(on){
+  placing=on;document.body.classList.toggle("measuring",on);
+  $("barIdle").style.display=on?"none":"flex";
+  $("barPlace").style.display=on?"flex":"none";
+  map.getContainer().style.cursor=on?"crosshair":"";
+  if(on){map.closePopup();$("sheet").classList.remove("open");showHint("Tap the map where the landmark is. Tap a node to put it exactly on that node.")}else hideHint();
+}
+function openLmForm(id,ll,nodeId){
+  lmEditId=id||null;
+  var l=id?landmarks.find(function(q){return q.id===id}):null;
+  lmPending=l?null:{lat:ll.lat,lng:ll.lng,node:nodeId||""};
+  $("lmTitleH").textContent=l?"Edit landmark":"New landmark";
+  $("lmType").value=l?l.type:"ohsr";
+  $("lmName").value=l?l.title:"";
+  $("lmSize").value=l?(l.size||"m"):"m";
+  $("lmWrap").classList.add("open");
+  setTimeout(function(){$("lmName").focus()},50);
+}
+function placeLandmarkAt(ll){
+  var n=nearestNode(ll,SNAP_PX);
+  if(n)ll=L.latLng(n.lat,n.lng);
+  openLmForm(null,ll,n?n.id:"");
+}
+$("btnLandmark").onclick=function(){setPlacing(true)};
+$("btnPlaceCancel").onclick=function(){setPlacing(false)};
+$("btnPlaceGps").onclick=function(){getPos(function(ll){openLmForm(null,ll,"")})};
+$("lmCancel").onclick=function(){$("lmWrap").classList.remove("open")};
+$("lmSave").onclick=function(){
+  var type=$("lmType").value,title=$("lmName").value.trim();
+  if(lmEditId){
+    var l=landmarks.find(function(q){return q.id===lmEditId});
+    if(l){l.type=type;l.title=title;l.size=$("lmSize").value}
+  }else if(lmPending){
+    landmarks.push({id:"l"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),type:type,title:title,size:$("lmSize").value,lat:lmPending.lat,lng:lmPending.lng,node:lmPending.node});
+  }
+  save();$("lmWrap").classList.remove("open");
+  if(placing)setPlacing(false);
+  refreshAll();toast("Landmark saved");
+};
+
 /* ---------- render saved pipes ---------- */
 function drawPipe(p){
   var color=PAL[colorKey(p)].s;
   var casing=L.polyline(p.coords,{color:"#000",weight:8,opacity:.55,interactive:false});
   var line=L.polyline(p.coords,{color:color,weight:5,opacity:1});
-  var lab=L.marker(midPoint(p.coords),{interactive:false,keyboard:false,icon:L.divIcon({className:"plabel",html:"<span style='border-color:"+color+"'>"+esc(labelText(p))+"</span>",iconSize:[0,0]})});
+  var lab=L.marker(midPoint(p.coords),{interactive:false,keyboard:false,icon:labIcon(p,color)});
   line.on("click",function(e){
-    if(drawing||selecting||measuring)return;
+    if(drawing||selecting||measuring||placing||adjusting)return;
     L.DomEvent.stopPropagation(e);
+    var lm=nearestLandmark(e.latlng,SNAP_PX+4);
+    if(lm){openLandmarkPopup(lm);return}
     var n=nearestNode(e.latlng,SNAP_PX);
     if(n){openNodePopup(n);return}
     L.popup().setLatLng(e.latlng).setContent(popupHtml(p)).openOn(map);
   });
+  pipeLayers[p.id]={casing:casing,line:line,lab:lab};
   pipeLayer.addLayer(casing);pipeLayer.addLayer(line);pipeLayer.addLayer(lab);
+}
+function labIcon(p,color){return L.divIcon({className:"plabel",html:"<span style='border-color:"+color+"'>"+esc(labelText(p))+"</span>",iconSize:[0,0]})}
+function updatePipeGeometry(p){
+  p.length=lineLen(p.coords);
+  var L2=pipeLayers[p.id];if(!L2)return;
+  L2.casing.setLatLngs(p.coords);L2.line.setLatLngs(p.coords);
+  L2.lab.setLatLng(midPoint(p.coords));L2.lab.setIcon(labIcon(p,PAL[colorKey(p)].s));
 }
 function popupHtml(p){
   return "<b>"+esc(nodeName(p.n1))+" &rarr; "+esc(nodeName(p.n2))+"</b><br>"+esc(STATUS[p.status].label)+" | "+esc(labelText(p))+"<br>Depth: "+esc(p.depth===""?"-":p.depth+" "+p.unit)+
@@ -452,9 +612,10 @@ map.on("popupopen",function(e){
   });
 });
 function refreshAll(){
-  pipeLayer.clearLayers();
+  pipeLayer.clearLayers();pipeLayers={};
   pipes.forEach(drawPipe);
   drawNodes();
+  drawLandmarks();
   $("cnt").textContent=pipes.length;
   $("fPrefix").value=prefix;
   renderList();
@@ -491,9 +652,11 @@ function addPt(ll){
   showHint(pts.length+" point"+(pts.length>1?"s":"")+" | "+Math.round(lineLen(pts))+" m so far");
 }
 map.on("click",function(e){
-  if(selecting||Date.now()<ignoreClickUntil)return;
+  if(selecting||adjusting||Date.now()<ignoreClickUntil)return;
   if(measuring){addMeasurePt(e.latlng);return}
+  if(placing){placeLandmarkAt(e.latlng);return}
   if(drawing){addPt(e.latlng);return}
+  var lm=nearestLandmark(e.latlng,SNAP_PX+4);if(lm){openLandmarkPopup(lm);return}
   var n=nearestNode(e.latlng,SNAP_PX);if(n)openNodePopup(n);
 });
 $("btnDraw").onclick=function(){map.closePopup();$("sheet").classList.remove("open");resetDraw();setDrawing(true)};
@@ -508,6 +671,84 @@ $("btnUndo").onclick=function(){
 $("btnFinish").onclick=function(){
   if(pts.length<2){toast("Add at least 2 points");return}
   openForm(null);
+};
+
+/* ---------- move nodes and landmarks ---------- */
+var adjusting=false,adjLayer=L.layerGroup(),undoStack=[];
+function snapState(){return JSON.stringify({pipes:pipes,nodes:nodes,landmarks:landmarks,sourceId:sourceId,next:nextNo})}
+function pushUndo(){undoStack.push(snapState());if(undoStack.length>30)undoStack.shift()}
+function moveNode(n,lat,lng){
+  n.lat=lat;n.lng=lng;
+  pipes.forEach(function(p){
+    var ch=false;
+    if(p.n1===n.id){p.coords[0]=[lat,lng];ch=true}
+    if(p.n2===n.id){p.coords[p.coords.length-1]=[lat,lng];ch=true}
+    if(ch)updatePipeGeometry(p);
+  });
+  landmarks.forEach(function(l){if(l.node===n.id){l.lat=lat;l.lng=lng}});
+}
+function mergeNodes(a,b){
+  pipes.forEach(function(p){
+    if(p.n1===a.id){p.n1=b.id;p.coords[0]=[b.lat,b.lng]}
+    if(p.n2===a.id){p.n2=b.id;p.coords[p.coords.length-1]=[b.lat,b.lng]}
+    p.length=lineLen(p.coords);
+  });
+  var before=pipes.length;
+  pipes=pipes.filter(function(p){return p.n1!==p.n2});
+  landmarks.forEach(function(l){if(l.node===a.id){l.node=b.id;l.lat=b.lat;l.lng=b.lng}});
+  if(sourceId===a.id)sourceId=b.id;
+  nodes=nodes.filter(function(n){return n.id!==a.id});
+  return before-pipes.length;
+}
+function buildHandles(){
+  adjLayer.clearLayers();
+  nodes.forEach(function(n){
+    var m=L.marker([n.lat,n.lng],{draggable:true,zIndexOffset:1000,icon:L.divIcon({className:"adjic",html:"<i></i><b>"+esc(n.name)+"</b>",iconSize:[0,0]})}).addTo(adjLayer);
+    m.on("dragstart",function(){pushUndo()});
+    m.on("drag",function(e){moveNode(n,e.latlng.lat,e.latlng.lng)});
+    m.on("dragend",function(){
+      var ll=m.getLatLng();moveNode(n,ll.lat,ll.lng);
+      var other=null,pt=map.latLngToContainerPoint(ll),bd=SNAP_PX;
+      nodes.forEach(function(o){if(o.id===n.id)return;var d=pt.distanceTo(map.latLngToContainerPoint([o.lat,o.lng]));if(d<bd){bd=d;other=o}});
+      if(other&&confirm("Merge node "+n.name+" into node "+other.name+"? Pipes between them will be removed and the rest will connect to "+other.name+".")){
+        var gone=mergeNodes(n,other);toast("Merged into "+other.name+(gone?" ("+gone+" pipe"+(gone>1?"s":"")+" removed)":""));
+      }else toast("Node "+n.name+" moved");
+      save();refreshAll();buildHandles();
+    });
+  });
+  landmarks.forEach(function(l){
+    var m=L.marker([l.lat,l.lng],{draggable:true,zIndexOffset:900,icon:L.divIcon({className:"adjlm",html:'<svg width="'+Math.max(28,Math.round(38*lmMul(l)))+'" height="'+Math.max(28,Math.round(38*lmMul(l)))+'" viewBox="-3.8 -3.8 7.6 7.6" style="left:-'+Math.max(14,Math.round(19*lmMul(l)))+'px;top:-'+Math.max(14,Math.round(19*lmMul(l)))+'px">'+lmShape(l.type,0,0,2.2,lmMul(l)<0.6?0:2.8,0.35,"#fff")+'</svg>',iconSize:[0,0]})}).addTo(adjLayer);
+    m.on("dragstart",function(){pushUndo()});
+    m.on("dragend",function(){
+      var ll=m.getLatLng(),n=nearestNode(ll,SNAP_PX);
+      if(n){ll=L.latLng(n.lat,n.lng);l.node=n.id}else l.node="";
+      l.lat=ll.lat;l.lng=ll.lng;save();refreshAll();buildHandles();toast(n?"Landmark placed on node "+n.name:"Landmark moved");
+    });
+  });
+}
+function setAdjusting(on){
+  adjusting=on;document.body.classList.toggle("adjusting",on);
+  $("barIdle").style.display=on?"none":"flex";
+  $("barAdj").style.display=on?"flex":"none";
+  if(on){
+    map.closePopup();$("sheet").classList.remove("open");undoStack=[];
+    map.removeLayer(nodeLayer);map.removeLayer(lmLayer);adjLayer.addTo(map);buildHandles();
+    showHint("Drag a green handle to move a node or landmark. Connected pipes follow. Drop a node on another node to merge them.");
+  }else{
+    map.removeLayer(adjLayer);adjLayer.clearLayers();nodeLayer.addTo(map);lmLayer.addTo(map);hideHint();refreshAll();
+  }
+}
+$("btnAdjust").onclick=function(){
+  if(drawing||measuring||placing||selecting){toast("Finish the current action first");return}
+  if(!nodes.length&&!landmarks.length){toast("Nothing to move yet");return}
+  setAdjusting(!adjusting);
+};
+$("btnADone").onclick=function(){setAdjusting(false)};
+$("btnAUndo").onclick=function(){
+  if(!undoStack.length){toast("Nothing to undo");return}
+  var o=JSON.parse(undoStack.pop());
+  pipes=o.pipes;nodes=o.nodes;landmarks=o.landmarks;sourceId=o.sourceId;nextNo=o.next;
+  save();refreshAll();buildHandles();toast("Move undone");
 };
 
 /* ---------- measuring tool ---------- */
@@ -672,17 +913,33 @@ $("mSave").onclick=function(){
 function renderList(){
   var te=0,tr=0;
   pipes.forEach(function(p){if(p.status==="required")tr+=p.length;else te+=p.length});
-  $("totals").innerHTML="<span style='border-color:var(--blue)'>Existing: "+Math.round(te)+" m</span><span style='border-color:var(--red)'>Required: "+Math.round(tr)+" m</span><span>Nodes: "+nodes.length+"</span>";
+  $("totals").innerHTML="<span style='border-color:var(--blue)'>Existing: "+Math.round(te)+" m</span><span style='border-color:var(--red)'>Required: "+Math.round(tr)+" m</span><span>Nodes: "+nodes.length+"</span>"+(landmarks.length?"<span>Landmarks: "+landmarks.length+"</span>":"");
   var l=$("list");
-  if(!pipes.length){l.innerHTML="<div class='empty'>No pipes yet. Tap Draw pipe, trace the route, then fill in the details.</div>";return}
-  l.innerHTML=pipes.slice().reverse().map(function(p){
+  if(!pipes.length&&!landmarks.length){l.innerHTML="<div class='empty'>No pipes yet. Tap Draw pipe, trace the route, then fill in the details.</div>";return}
+  var h=pipes.slice().reverse().map(function(p){
     return "<div class='row'><div class='sw' style='background:"+PAL[colorKey(p)].s+"'></div><div class='main'><div class='t'>"+esc(nodeName(p.n1))+" &rarr; "+esc(nodeName(p.n2))+"</div><div class='s'>"+esc(STATUS[p.status].label)+" | "+esc(labelText(p))+" | depth "+esc(p.depth===""?"-":p.depth+" "+p.unit)+"</div></div>"+
     "<button data-a='go' data-id='"+esc(p.id)+"' aria-label='Show on map'>Go</button><button data-a='ed' data-id='"+esc(p.id)+"' aria-label='Edit'>Edit</button><button data-a='rm' data-id='"+esc(p.id)+"' aria-label='Delete'>Del</button></div>";
   }).join("");
+  if(landmarks.length){
+    h+="<div class='sec'>Landmarks</div>"+landmarks.map(function(q){
+      var T=TYPES[q.type]||TYPES.other;
+      return "<div class='row'><div class='sw' style='background:"+T.color+"'></div><div class='main'><div class='t'>"+esc(q.title||T.label)+"</div><div class='s'>"+esc(T.full)+"</div></div>"+
+      "<button data-a='lgo' data-id='"+esc(q.id)+"' aria-label='Show on map'>Go</button><button data-a='led' data-id='"+esc(q.id)+"' aria-label='Edit'>Edit</button><button data-a='lrm' data-id='"+esc(q.id)+"' aria-label='Delete'>Del</button></div>";
+    }).join("");
+  }
+  l.innerHTML=h;
 }
 $("list").addEventListener("click",function(e){
   var b=e.target.closest("button[data-a]");if(!b)return;
-  var id=b.dataset.id,p=pipes.find(function(x){return x.id===id});if(!p)return;
+  var id=b.dataset.id,act=b.dataset.a;
+  if(act==="lgo"||act==="led"||act==="lrm"){
+    var lmk=landmarks.find(function(q){return q.id===id});if(!lmk)return;
+    if(act==="lgo"){$("sheet").classList.remove("open");map.setView([lmk.lat,lmk.lng],19)}
+    if(act==="led"){$("sheet").classList.remove("open");openLmForm(id)}
+    if(act==="lrm"){if(confirm("Delete landmark "+(lmk.title||TYPES[lmk.type].label)+"?")){landmarks=landmarks.filter(function(q){return q.id!==id});save();refreshAll()}}
+    return;
+  }
+  var p=pipes.find(function(x){return x.id===id});if(!p)return;
   if(b.dataset.a==="go"){$("sheet").classList.remove("open");map.fitBounds(L.latLngBounds(p.coords),{maxZoom:19,padding:[40,40]})}
   if(b.dataset.a==="ed"){$("sheet").classList.remove("open");openForm(id)}
   if(b.dataset.a==="rm")delPipe(id);
@@ -699,6 +956,7 @@ $("btnClean").onclick=function(){
   });
   nodes=kept;
   if(map[sourceId])sourceId=map[sourceId];
+  landmarks.forEach(function(q){if(map[q.node])q.node=map[q.node]});
   pipes.forEach(function(p){
     if(map[p.n1])p.n1=map[p.n1];if(map[p.n2])p.n2=map[p.n2];
     var a=nodeById(p.n1),b=nodeById(p.n2),e=p.coords.length-1;
@@ -775,6 +1033,14 @@ function buildKml(){
     });
     out.push('</Folder>');
   });
+  if(landmarks.length){
+    out.push('<Folder><name>Landmarks</name>');
+    landmarks.forEach(function(q){
+      var T=TYPES[q.type]||TYPES.other,nd=q.node?nodeById(q.node):null;
+      out.push('<Placemark><name>'+esc(q.title||T.label)+'</name><description><![CDATA['+esc(T.full)+(nd?'<br>At node '+esc(nd.name):'')+']]></description><ExtendedData><Data name="type"><value>'+esc(T.full)+'</value></Data></ExtendedData><Style><IconStyle><color>'+kmlColor(T.color)+'</color><scale>1.2</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_square.png</href></Icon></IconStyle></Style><Point><coordinates>'+q.lng.toFixed(7)+','+q.lat.toFixed(7)+',0</coordinates></Point></Placemark>');
+    });
+    out.push('</Folder>');
+  }
   if(nodes.length){
     out.push('<Folder><name>Nodes</name>');
     nodes.forEach(function(n){
@@ -796,7 +1062,7 @@ $("btnCsv").onclick=function(){
   });
   download("pipelines_"+stamp()+".csv","\ufeff"+rows.map(function(r){return r.map(csvCell).join(",")}).join("\n"),"text/csv");
 };
-$("btnJson").onclick=function(){download("pipelines_backup_"+stamp()+".json",JSON.stringify({v:2,pipes:pipes,nodes:nodes,prefix:prefix,next:nextNo,source:sourceId}),"application/json")};
+$("btnJson").onclick=function(){download("pipelines_backup_"+stamp()+".json",JSON.stringify({v:2,pipes:pipes,nodes:nodes,landmarks:landmarks,prefix:prefix,next:nextNo,source:sourceId}),"application/json")};
 $("btnImport").onclick=function(){$("fileIn").click()};
 $("fileIn").onchange=function(e){
   var f=e.target.files[0];if(!f)return;
@@ -815,8 +1081,8 @@ $("fileIn").onchange=function(e){
   r.readAsText(f);e.target.value="";
 };
 $("btnClear").onclick=function(){
-  if(!pipes.length)return;
-  if(confirm("Delete all "+pipes.length+" pipes and "+nodes.length+" nodes from this device? Download a backup first.")){pipes=[];nodes=[];nextNo=1;save();refreshAll()}
+  if(!pipes.length&&!landmarks.length)return;
+  if(confirm("Delete all "+pipes.length+" pipes, "+nodes.length+" nodes and "+landmarks.length+" landmarks from this device? Download a backup first.")){pipes=[];nodes=[];landmarks=[];nextNo=1;sourceId="";save();refreshAll()}
 };
 
 /* ---------- printable drawing (plain map, no imagery) ---------- */
@@ -848,7 +1114,7 @@ function haloText(attrs,size,txt){
 function getHdr(){var h={};try{h=JSON.parse(localStorage.getItem(HKEY)||"{}")||{}}catch(e){}return h}
 var viewBounds=null;
 function buildDrawing(){
-  var hdr={title:$("pTitle").value,sub:$("pSub").value,by:$("pBy").value,nodes:$("pNodes").value,lbl:$("pLbl").value,font:$("pFont").value,line:$("pLine").value,dot:$("pDot").value,arrow:$("pArrow").value};
+  var hdr={title:$("pTitle").value,sub:$("pSub").value,by:$("pBy").value,nodes:$("pNodes").value,lbl:$("pLbl").value,font:$("pFont").value,line:$("pLine").value,dot:$("pDot").value,arrow:$("pArrow").value,lm:$("pLm").value,lmsz:$("pLmSize").value};
   try{localStorage.setItem(HKEY,JSON.stringify(hdr))}catch(e){}
   var title=hdr.title.trim()||"Village Water Pipeline Map";
   var areaMode=$("pArea").value==="view"&&viewBounds?"view":"all";
@@ -908,7 +1174,6 @@ function buildDrawing(){
   /* header */
   out.push('<text x="'+(M+4)+'" y="'+(M+8.5)+'" font-size="6.5" font-weight="700" fill="#111">'+esc(title)+'</text>');
   if(hdr.sub.trim())out.push('<text x="'+(M+4)+'" y="'+(M+13.2)+'" font-size="3.4" fill="#222">'+esc(hdr.sub.trim())+'</text>');
-  out.push('<text x="'+(W-M-4)+'" y="'+(M+8.5)+'" font-size="3.2" text-anchor="end" fill="#333">Date: '+esc(new Date().toLocaleDateString("en-GB"))+'</text>');
   if(hdr.by.trim())out.push('<text x="'+(W-M-4)+'" y="'+(M+13.2)+'" font-size="3.2" text-anchor="end" fill="#333">Prepared by: '+esc(hdr.by.trim())+'</text>');
 
   /* geometry helpers for label placement */
@@ -949,6 +1214,14 @@ function buildDrawing(){
     });
   }
 
+  var vlm=[];
+  if($("pLm").value!=="off"){
+    landmarks.forEach(function(l){
+      var q=prj([l.lat,l.lng]),x=q[0]*sc+ox,y=q[1]*sc+oy;
+      if(x>=mx0-1&&x<=mx1+1&&y>=my0-1&&y<=my1+1)vlm.push({l:l,x:x,y:y,k:lmMul(l)*(parseFloat($("pLmSize").value)||1),title:l.title||TYPES[l.type].label});
+    });
+  }
+
   /* place every label at one text size; shrink the size for the whole sheet until nothing collides */
   function place(fmAbs){
     var f0=fs0*fmAbs,boxes=[],nodeOut=[],labOut=[],bad=0;
@@ -962,6 +1235,21 @@ function buildDrawing(){
     vnodes.forEach(function(o){
       boxes.push(polyOf(o.x,o.y,0,dotR+0.5,dotR+0.5));
       nodeOut.push('<circle cx="'+f2(o.x)+'" cy="'+f2(o.y)+'" r="'+dotR+'" fill="#111" stroke="#fff" stroke-width="0.3"/>');
+    });
+    vlm.forEach(function(o){
+      boxes.push(polyOf(o.x,o.y,0,2.9*o.k,2.9*o.k));
+      nodeOut.push(lmShape(o.l.type,o.x,o.y,2.1*o.k,o.k<0.6?0:f2(2.6*o.k),o.k<0.6?0.2:0.3,"#111"));
+    });
+    vlm.forEach(function(o){
+      var lf=f2(f0*1.15*Math.max(0.85,Math.min(1.5,Math.sqrt(o.k)))),hw=o.title.length*lf*0.6/2+0.8,hh=lf*0.62,g=2.1*o.k+1.3,best=null;
+      [[g+hw,0],[-g-hw,0],[0,-g-hh],[0,g+hh],[g+hw,-g],[-g-hw,-g],[g+hw,g],[-g-hw,g]].forEach(function(c){
+        var r=scoreRect(o.x+c[0],o.y+c[1],0,hw,hh);
+        if(!best||r.s<best.s)best={s:r.s,poly:r.poly,x:o.x+c[0],y:o.y+c[1]};
+      });
+      if(best.s>=1)bad++;
+      boxes.push(best.poly);
+      nodeOut.push('<rect x="'+f2(best.x-hw)+'" y="'+f2(best.y-hh)+'" width="'+f2(2*hw)+'" height="'+f2(2*hh)+'" fill="#fff" fill-opacity="0.92"/>');
+      nodeOut.push('<text x="'+f2(best.x)+'" y="'+f2(best.y+lf*0.35)+'" text-anchor="middle" font-size="'+lf+'" font-weight="700" fill="#111">'+esc(o.title)+'</text>');
     });
     if(lblMode!=="none"){
       pipes.forEach(function(p,i){
@@ -1050,6 +1338,18 @@ function buildDrawing(){
   out.push('<line x1="'+X1+'" y1="'+(ry-3.6)+'" x2="'+(X4+1)+'" y2="'+(ry-3.6)+'" stroke="#999" stroke-width="0.2"/>');
   out.push('<text x="'+X2+'" y="'+(ry-0.2)+'" font-size="3.2" font-weight="700" fill="#111">Total</text><text x="'+X3+'" y="'+(ry-0.2)+'" font-size="3.2" font-weight="700" text-anchor="end" fill="#111">'+visCount+'</text><text x="'+X4+'" y="'+(ry-0.2)+'" font-size="3.2" font-weight="700" text-anchor="end" fill="#111">'+Math.round(totalLen)+'</text>');
 
+  /* landmark legend */
+  if(vlm.length){
+    var usedT={};vlm.forEach(function(o){usedT[o.l.type]=1});
+    var lx=M+112;
+    out.push('<text x="'+lx+'" y="'+(fy+6)+'" font-size="3.6" font-weight="700" fill="#111">Landmarks</text>');
+    Object.keys(TYPES).filter(function(k){return usedT[k]}).forEach(function(k,i){
+      var yy=fy+12+i*5;
+      out.push(lmShape(k,lx+2.2,yy-1,1.6,2,0.25,"#111"));
+      out.push('<text x="'+(lx+6.5)+'" y="'+yy+'" font-size="3" fill="#111">'+esc(TYPES[k].label)+'</text>');
+    });
+  }
+
   /* notes + scale bar */
   var rx=W-M-4,ny2=fy+8;
   if(showArrows){out.push('<text x="'+rx+'" y="'+ny2+'" font-size="2.9" text-anchor="end" fill="#111">Arrows show direction of flow</text>');ny2+=4.5}
@@ -1071,7 +1371,7 @@ function openPrint(bounds,areaVal){
   $("sheet").classList.remove("open");
   viewBounds=bounds||map.getBounds();
   var h=getHdr();$("pTitle").value=h.title||"";$("pSub").value=h.sub||"";$("pBy").value=h.by||"";
-  if(h.nodes)$("pNodes").value=h.nodes;if(h.lbl)$("pLbl").value=h.lbl;if(h.font)$("pFont").value=h.font;if(h.line)$("pLine").value=h.line;if(h.arrow)$("pArrow").value=h.arrow;if(h.dot)$("pDot").value=h.dot;
+  if(h.nodes)$("pNodes").value=h.nodes;if(h.lbl)$("pLbl").value=h.lbl;if(h.font)$("pFont").value=h.font;if(h.line)$("pLine").value=h.line;if(h.arrow)$("pArrow").value=h.arrow;if(h.lm)$("pLm").value=h.lm;if(h.lmsz)$("pLmSize").value=h.lmsz;if(h.dot)$("pDot").value=h.dot;
   $("pArea").value=areaVal||"all";
   $("printView").classList.add("open");
   buildDrawing();
@@ -1121,7 +1421,7 @@ $("btnSelCancel").onclick=endSelect;
 $("pPick").onclick=function(){$("printView").classList.remove("open");startSelect()};
 $("pClose").onclick=function(){$("printView").classList.remove("open")};
 $("pTitle").oninput=buildDrawing;$("pSub").oninput=buildDrawing;$("pBy").oninput=buildDrawing;
-$("pPaper").onchange=buildDrawing;$("pArea").onchange=buildDrawing;$("pArrow").onchange=buildDrawing;$("pNodes").onchange=buildDrawing;$("pLbl").onchange=buildDrawing;$("pFont").onchange=buildDrawing;$("pLine").onchange=buildDrawing;$("pDot").onchange=buildDrawing;$("pOrient").onchange=buildDrawing;
+$("pPaper").onchange=buildDrawing;$("pLm").onchange=buildDrawing;$("pLmSize").onchange=buildDrawing;$("pArea").onchange=buildDrawing;$("pArrow").onchange=buildDrawing;$("pNodes").onchange=buildDrawing;$("pLbl").onchange=buildDrawing;$("pFont").onchange=buildDrawing;$("pLine").onchange=buildDrawing;$("pDot").onchange=buildDrawing;$("pOrient").onchange=buildDrawing;
 $("pPrint").onclick=function(){buildDrawing();setTimeout(function(){window.print()},150)};
 
 /* ---------- start ---------- */
