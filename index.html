@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Village Pipeline Mapper</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<style>
+:root{--bg:#10161a;--panel:#182127;--line:#2b3a44;--text:#eef3f5;--muted:#9bb0ba;--accent:#3ddc97;--blue:#2979ff;--red:#ff1744}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#map{position:absolute;inset:0}
+.bar{position:absolute;left:0;right:0;bottom:0;z-index:1000;display:flex;gap:8px;padding:10px 10px calc(10px + env(safe-area-inset-bottom,0px));background:rgba(16,22,26,.92);border-top:1px solid var(--line)}
+.bar button{flex:1;min-height:48px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:15px;font-weight:600;border-radius:10px}
+.bar button.primary{background:var(--accent);color:#06281a;border-color:var(--accent)}
+.bar button.danger{color:#ff8a8a}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.hint{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:10px;right:10px;z-index:1000;background:rgba(16,22,26,.92);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px;display:none}
+.legend{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:10px;z-index:900;background:rgba(16,22,26,.88);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px}
+.legend div{display:flex;align-items:center;gap:8px;margin:3px 0}
+.legend i{display:inline-block;width:26px;height:5px;border-radius:3px}
+body.drawing .legend{display:none}
+.plabel span{display:inline-block;transform:translate(-50%,-50%);white-space:nowrap;background:rgba(10,14,16,.85);color:#fff;font-weight:700;font-size:12px;padding:2px 6px;border-radius:6px;border:2px solid #fff}
+.nodeic i{position:absolute;left:-6px;top:-6px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid #111}
+.nodeic b{position:absolute;left:8px;top:-24px;font:700 12px system-ui,sans-serif;color:#fff;background:rgba(10,14,16,.85);padding:1px 6px;border-radius:5px;white-space:nowrap}
+.vtx{background:#fff;border:2px solid #111;border-radius:50%}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:1100;max-height:88%;background:var(--panel);border-top:1px solid var(--line);border-radius:16px 16px 0 0;display:none;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px)}
+.sheet.open{display:flex}
+.sheet header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 8px}
+.sheet h2{margin:0;font-size:18px}
+.sheet .x{background:none;border:none;color:var(--muted);font-size:26px;min-width:44px;min-height:44px}
+.totals{display:flex;gap:8px;padding:0 16px 8px;flex-wrap:wrap;font-size:13px}
+.totals span{border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+.setrow{display:flex;gap:8px;align-items:center;padding:0 16px 8px}
+.setrow label{display:inline;margin:0;white-space:nowrap;font-size:13px;color:var(--muted)}
+.setrow input{flex:1;min-width:0;min-height:40px!important}
+.setrow button{min-height:40px;padding:0 12px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:8px;font-weight:600}
+.list{overflow:auto;padding:0 12px 8px;min-height:60px}
+.row{display:flex;gap:10px;align-items:center;padding:10px 6px;border-top:1px solid var(--line)}
+.row .sw{width:6px;align-self:stretch;border-radius:3px}
+.row .main{flex:1;min-width:0}
+.row .t{font-weight:700;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .s{color:var(--muted);font-size:13px}
+.row button{min-height:40px;min-width:40px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:8px}
+.empty{padding:24px 16px;color:var(--muted)}
+.exp{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 16px 16px;border-top:1px solid var(--line)}
+.exp button{min-height:48px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:10px;font-size:15px;font-weight:600}
+.exp button.primary{background:var(--accent);color:#06281a;border-color:var(--accent)}
+.exp .full{grid-column:1/-1}
+.modalwrap{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center}
+.modalwrap.open{display:flex}
+.modal{width:100%;max-width:480px;max-height:94%;overflow:auto;background:var(--panel);border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.modal h2{margin:0 0 4px;font-size:18px}
+.modal .len{color:var(--muted);font-size:14px;margin-bottom:6px}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 4px}
+input[type=text],input[type=number],select{width:100%;min-height:46px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);padding:8px 12px;font-size:16px;font-family:inherit}
+.seg{display:grid;gap:8px}
+.seg.c2{grid-template-columns:1fr 1fr}
+.seg.c5{grid-template-columns:repeat(5,1fr);gap:6px}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{margin:0;text-align:center;padding:12px 4px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--text);font-weight:700;font-size:16px;cursor:pointer;border-bottom-width:6px}
+.seg input:checked + label{background:#222f37;border-color:#fff}
+.seg input:focus-visible + label{outline:3px solid #fff}
+.seg.c5 label{display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 2px;font-size:11px;font-weight:600;border-bottom-width:2px}
+.seg.c5 i{display:block;width:28px;height:28px;border-radius:50%;border:2px solid #000}
+.depthrow{display:grid;grid-template-columns:1fr 90px;gap:8px}
+.acts{display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-top:16px}
+.acts button{min-height:50px;border-radius:10px;font-size:16px;font-weight:700;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+.acts button.primary{background:var(--accent);color:#06281a;border-color:var(--accent)}
+#printView{position:fixed;inset:0;z-index:5000;background:#dfe5e9;display:none;flex-direction:column;color:#111}
+#printView.open{display:flex}
+.ptools{display:flex;flex-wrap:wrap;gap:8px;padding:10px;background:var(--panel);border-bottom:1px solid var(--line)}
+.ptools input[type=text]{flex:1 1 100%;min-height:42px}
+.ptools select{flex:1;min-width:90px;min-height:42px}
+.ptools button{flex:1;min-height:46px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:15px;font-weight:700}
+.ptools button.primary{background:var(--accent);color:#06281a;border-color:var(--accent);flex:2}
+.pstage{flex:1;overflow:auto;padding:10px;-webkit-overflow-scrolling:touch}
+.pstage svg{display:block;min-width:760px;width:100%;height:auto;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+@media print{
+  html,body{background:#fff!important;height:auto!important;overflow:visible!important}
+  body>*:not(#printView){display:none!important}
+  #printView{position:static!important;display:block!important;background:#fff;width:var(--pw);height:var(--ph);overflow:hidden}
+  .ptools{display:none!important}
+  .pstage{overflow:visible;padding:0}
+  .pstage svg{min-width:0;width:var(--pw);height:var(--ph);box-shadow:none}
+}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#fff;color:#111;padding:10px 16px;border-radius:999px;font-size:14px;font-weight:600;z-index:6000;display:none;max-width:92%;text-align:center}
+.leaflet-popup-content{font-size:14px;line-height:1.4}
+.leaflet-popup-content button{margin:6px 6px 0 0;min-height:36px;padding:0 12px;border-radius:8px;border:1px solid #bbb;background:#fff}
+</style>
+<style id="pageStyle"></style>
+</head>
+<body>
+<div id="map"></div>
+<div class="hint" id="hint"></div>
+
+<div class="legend">
+  <div><i style="background:var(--blue)"></i>Existing</div>
+  <div><i style="background:var(--red)"></i>Required</div>
+</div>
+
+<div class="bar" id="barIdle">
+  <button class="primary" id="btnDraw">Draw pipe</button>
+  <button id="btnGps">My location</button>
+  <button id="btnList">Pipes (<span id="cnt">0</span>)</button>
+</div>
+<div class="bar" id="barDraw" style="display:none">
+  <button id="btnUndo">Undo</button>
+  <button id="btnAddGps">+ GPS point</button>
+  <button class="primary" id="btnFinish">Finish</button>
+  <button class="danger" id="btnCancel">Cancel</button>
+</div>
+
+<div class="sheet" id="sheet">
+  <header><h2>Pipes &amp; nodes</h2><button class="x" id="btnCloseSheet" aria-label="Close">&times;</button></header>
+  <div class="totals" id="totals"></div>
+  <div class="setrow">
+    <label for="fPrefix">Node names</label>
+    <input type="text" id="fPrefix" maxlength="6" placeholder="prefix, e.g. A (blank = 1,2,3)" autocomplete="off">
+    <button id="btnRenum">Renumber</button>
+  </div>
+  <div class="list" id="list"></div>
+  <div class="exp">
+    <button class="primary full" id="btnPrintMap">Printable drawing (PDF)</button>
+    <button class="full" id="btnKml">Download KML for Google Earth</button>
+    <button id="btnCsv">Download CSV</button>
+    <button id="btnJson">Backup (JSON)</button>
+    <button id="btnImport">Restore backup</button>
+    <button id="btnClear" style="color:#ff8a8a">Delete all</button>
+  </div>
+  <input type="file" id="fileIn" accept=".json,application/json" style="display:none">
+</div>
+
+<div class="modalwrap" id="modalWrap">
+  <div class="modal" role="dialog" aria-labelledby="mTitle">
+    <h2 id="mTitle">New pipe</h2>
+    <div class="len" id="mLen"></div>
+
+    <label>Pipe status</label>
+    <div class="seg c2">
+      <div><input type="radio" name="stat" id="sEx" value="existing"><label for="sEx" style="border-bottom-color:var(--blue)">Existing</label></div>
+      <div><input type="radio" name="stat" id="sRq" value="required"><label for="sRq" style="border-bottom-color:var(--red)">Required</label></div>
+    </div>
+
+    <label>Colour (default follows status)</label>
+    <div class="seg c5" id="cols"></div>
+
+    <label for="fDia">Diameter</label>
+    <select id="fDia">
+      <option value="">Select diameter</option>
+      <option value="2">2 inch</option>
+      <option value="2.5">2.5 inch</option>
+      <option value="3">3 inch</option>
+      <option value="5">5 inch</option>
+    </select>
+
+    <label for="fDepth">Depth underground</label>
+    <div class="depthrow"><input type="number" id="fDepth" inputmode="decimal" step="0.1" min="0"><select id="fUnit" aria-label="Depth unit"><option>ft</option><option>m</option></select></div>
+
+    <div class="acts">
+      <button id="mCancel">Discard</button>
+      <button class="primary" id="mSave">Save pipe</button>
+    </div>
+  </div>
+</div>
+
+<div id="printView">
+  <div class="ptools">
+    <input type="text" id="pTitle" aria-label="Header title" placeholder="Title, e.g. Village name water supply scheme">
+    <input type="text" id="pSub" aria-label="Header second line" placeholder="Second line, e.g. Habitation, GP, Mandal, District">
+    <input type="text" id="pBy" aria-label="Prepared by" placeholder="Prepared by (name / designation)">
+    <select id="pNodes" aria-label="Nodes on print"><option value="names">Nodes: circles + names</option><option value="circles">Nodes: circles only</option><option value="none">Nodes: hidden</option></select>
+    <select id="pLbl" aria-label="Pipe labels on print"><option value="both">Labels: dia | length</option><option value="len">Labels: length only</option><option value="none">Labels: none</option></select>
+    <select id="pFont" aria-label="Text size"><option value="1">Text: normal</option><option value="0.8">Text: small</option><option value="1.3">Text: large</option></select>
+    <select id="pPaper" aria-label="Paper size"><option value="A4">A4</option><option value="A3">A3</option></select>
+    <select id="pOrient" aria-label="Orientation"><option value="auto">Auto</option><option value="landscape">Landscape</option><option value="portrait">Portrait</option></select>
+    <button id="pClose">Close</button>
+    <button class="primary" id="pPrint">Print / Save as PDF</button>
+  </div>
+  <div class="pstage" id="pStage"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- constants ---------- */
+var PAL={
+  blue:{s:"#2979ff",p:"#1565c0"},
+  red:{s:"#ff1744",p:"#d50000"},
+  green:{s:"#76ff03",p:"#2e7d32"},
+  yellow:{s:"#ffea00",p:"#d69e00"},
+  orange:{s:"#ff9100",p:"#e65100"},
+  purple:{s:"#e040fb",p:"#8e24aa"}
+};
+var STATUS={existing:{label:"Existing",key:"blue"},required:{label:"Required",key:"red"}};
+var EXTRA=["green","yellow","orange","purple"];
+var DIAS=["2","2.5","3","5"];
+var PWID={"2":0.7,"2.5":0.9,"3":1.1,"5":1.5};
+var KEY2="pipeline-mapper-v2",KEY1="pipeline-mapper-v1",HKEY="pipeline-mapper-header";
+var SNAP_PX=24;
+
+/* ---------- helpers ---------- */
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})}
+function toast(m){var t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(toast._t);toast._t=setTimeout(function(){t.style.display="none"},2800)}
+function hav(a,b){var R=6371000,r=Math.PI/180,dLat=(b[0]-a[0])*r,dLng=(b[1]-a[1])*r;
+  var x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return 2*R*Math.asin(Math.sqrt(x))}
+function lineLen(c){var s=0;for(var i=1;i<c.length;i++)s+=hav(c[i-1],c[i]);return s}
+function midPoint(c){
+  var half=lineLen(c)/2,acc=0;
+  for(var i=1;i<c.length;i++){
+    var d=hav(c[i-1],c[i]);
+    if(acc+d>=half){var f=d?(half-acc)/d:0;return [c[i-1][0]+(c[i][0]-c[i-1][0])*f,c[i-1][1]+(c[i][1]-c[i-1][1])*f]}
+    acc+=d;
+  }
+  return c[c.length-1];
+}
+function labelText(p){return p.dia+"\" | "+Math.round(p.length)+" m"}
+function colorKey(p){return p.color&&PAL[p.color]?p.color:STATUS[p.status||"existing"].key}
+
+/* ---------- state ---------- */
+var pipes=[],nodes=[],prefix="",nextNo=1;
+function save(){
+  try{localStorage.setItem(KEY2,JSON.stringify({v:2,pipes:pipes,nodes:nodes,prefix:prefix,next:nextNo}))}
+  catch(e){toast("Could not save in this browser. Download a backup.")}
+}
+function nameTaken(n){var l=String(n).toLowerCase();return nodes.some(function(x){return String(x.name).toLowerCase()===l})}
+function newName(){var n;do{n=prefix+nextNo;nextNo++}while(nameTaken(n));return n}
+function ensureNode(c){
+  for(var i=0;i<nodes.length;i++){if(hav([nodes[i].lat,nodes[i].lng],c)<1.5)return nodes[i].id}
+  var nd={id:"n"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name:newName(),lat:c[0],lng:c[1]};
+  nodes.push(nd);return nd.id;
+}
+function nodeById(id){for(var i=0;i<nodes.length;i++)if(nodes[i].id===id)return nodes[i];return null}
+function nodeName(id){var n=nodeById(id);return n?n.name:"?"}
+function pruneNodes(){
+  var used={};pipes.forEach(function(p){used[p.n1]=1;used[p.n2]=1});
+  nodes=nodes.filter(function(n){return used[n.id]});
+}
+function normalizePipe(p){
+  if(!p||!Array.isArray(p.coords)||p.coords.length<2||!p.dia)return null;
+  var q={id:p.id||("p"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)),
+    status:STATUS[p.status]?p.status:"existing",color:PAL[p.color]?p.color:"",dia:String(p.dia),
+    depth:p.depth==null?"":p.depth,unit:p.unit||"ft",coords:p.coords,length:lineLen(p.coords),
+    ts:p.ts||new Date().toISOString(),n1:p.n1,n2:p.n2};
+  if(!q.n1||!nodeById(q.n1))q.n1=ensureNode(q.coords[0]);
+  if(!q.n2||!nodeById(q.n2))q.n2=ensureNode(q.coords[q.coords.length-1]);
+  return q;
+}
+function setState(obj){
+  var list=Array.isArray(obj)?obj:(obj&&obj.pipes)||[];
+  nodes=(!Array.isArray(obj)&&obj&&Array.isArray(obj.nodes))?obj.nodes.filter(function(n){return n&&n.id&&isFinite(n.lat)&&isFinite(n.lng)}):[];
+  prefix=(!Array.isArray(obj)&&obj&&obj.prefix)||"";
+  nextNo=(!Array.isArray(obj)&&obj&&obj.next)||1;
+  nodes.forEach(function(n){n.name=String(n.name)});
+  pipes=[];
+  list.forEach(function(p){var q=normalizePipe(p);if(q)pipes.push(q)});
+  pruneNodes();
+}
+function loadState(){
+  var raw=null;
+  try{raw=JSON.parse(localStorage.getItem(KEY2)||"null")}catch(e){}
+  if(raw&&raw.pipes){setState(raw);return}
+  var old=null;try{old=JSON.parse(localStorage.getItem(KEY1)||"null")}catch(e){}
+  if(Array.isArray(old)){setState(old);save()}
+}
+
+/* ---------- map ---------- */
+var map=L.map("map",{zoomControl:false,maxZoom:21}).setView([16.5062,80.648],15);
+var gHybrid=L.tileLayer("https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",{subdomains:"0123",maxZoom:21,maxNativeZoom:20,attribution:"Map data &copy; Google"}).addTo(map);
+var gSat=L.tileLayer("https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",{subdomains:"0123",maxZoom:21,maxNativeZoom:20,attribution:"Map data &copy; Google"});
+var esri=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:21,maxNativeZoom:19,attribution:"Imagery &copy; Esri"});
+var osm=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:21,maxNativeZoom:19,attribution:"&copy; OpenStreetMap"});
+L.control.layers({"Google satellite + names":gHybrid,"Google satellite":gSat,"Esri satellite":esri,"Street":osm},{},{position:"topleft"}).addTo(map);
+L.control.zoom({position:"topleft"}).addTo(map);
+L.control.scale({imperial:false,position:"bottomleft"}).addTo(map);
+
+var pipeLayer=L.layerGroup().addTo(map);
+var nodeLayer=L.layerGroup().addTo(map);
+var drawing=false;
+
+loadState();
+
+/* ---------- node helpers on map ---------- */
+function nearestNode(ll,px){
+  var pt=map.latLngToContainerPoint(ll),best=null,bd=px;
+  nodes.forEach(function(n){
+    var d=pt.distanceTo(map.latLngToContainerPoint([n.lat,n.lng]));
+    if(d<bd){bd=d;best=n}
+  });
+  return best;
+}
+function openNodePopup(n){
+  var d=document.createElement("div");
+  var used=pipes.filter(function(p){return p.n1===n.id||p.n2===n.id}).length;
+  d.innerHTML="<b>Node</b> ("+used+" pipe"+(used===1?"":"s")+")<br>";
+  var inp=document.createElement("input");inp.type="text";inp.value=n.name;inp.setAttribute("aria-label","Node name");
+  inp.style.cssText="width:120px;min-height:36px;font-size:16px;margin:6px 6px 0 0;padding:0 8px;border:1px solid #999;border-radius:8px;background:#fff;color:#111";
+  var b=document.createElement("button");b.textContent="Rename";
+  b.onclick=function(){
+    var v=inp.value.trim();
+    if(!v){toast("Name cannot be empty");return}
+    if(v.toLowerCase()!==n.name.toLowerCase()&&nameTaken(v)){toast("That name is already used");return}
+    n.name=v;save();map.closePopup();refreshAll();toast("Renamed to "+v);
+  };
+  d.appendChild(inp);d.appendChild(b);
+  L.popup().setLatLng([n.lat,n.lng]).setContent(d).openOn(map);
+}
+function drawNodes(){
+  nodeLayer.clearLayers();
+  nodes.forEach(function(n){
+    L.marker([n.lat,n.lng],{interactive:false,keyboard:false,icon:L.divIcon({className:"nodeic",html:"<i></i><b>"+esc(n.name)+"</b>",iconSize:[0,0]})}).addTo(nodeLayer);
+  });
+}
+
+/* ---------- render saved pipes ---------- */
+function drawPipe(p){
+  var color=PAL[colorKey(p)].s;
+  var casing=L.polyline(p.coords,{color:"#000",weight:8,opacity:.55,interactive:false});
+  var line=L.polyline(p.coords,{color:color,weight:5,opacity:1});
+  var lab=L.marker(midPoint(p.coords),{interactive:false,keyboard:false,icon:L.divIcon({className:"plabel",html:"<span style='border-color:"+color+"'>"+esc(labelText(p))+"</span>",iconSize:[0,0]})});
+  line.on("click",function(e){
+    if(drawing)return;
+    L.DomEvent.stopPropagation(e);
+    var n=nearestNode(e.latlng,SNAP_PX);
+    if(n){openNodePopup(n);return}
+    L.popup().setLatLng(e.latlng).setContent(popupHtml(p)).openOn(map);
+  });
+  pipeLayer.addLayer(casing);pipeLayer.addLayer(line);pipeLayer.addLayer(lab);
+}
+function popupHtml(p){
+  return "<b>"+esc(nodeName(p.n1))+" &rarr; "+esc(nodeName(p.n2))+"</b><br>"+esc(STATUS[p.status].label)+" | "+esc(labelText(p))+"<br>Depth: "+esc(p.depth===""?"-":p.depth+" "+p.unit)+
+    "<br><button data-act='edit' data-id='"+esc(p.id)+"'>Edit</button><button data-act='del' data-id='"+esc(p.id)+"'>Delete</button>";
+}
+map.on("popupopen",function(e){
+  var el=e.popup.getElement();
+  el.addEventListener("click",function(ev){
+    var b=ev.target.closest("button[data-act]");if(!b)return;
+    map.closePopup();
+    if(b.dataset.act==="edit")openForm(b.dataset.id);else delPipe(b.dataset.id);
+  });
+});
+function refreshAll(){
+  pipeLayer.clearLayers();
+  pipes.forEach(drawPipe);
+  drawNodes();
+  $("cnt").textContent=pipes.length;
+  $("fPrefix").value=prefix;
+  renderList();
+}
+function delPipe(id){
+  var p=pipes.find(function(x){return x.id===id});if(!p)return;
+  if(!confirm("Delete pipe "+nodeName(p.n1)+" to "+nodeName(p.n2)+"?"))return;
+  pipes=pipes.filter(function(x){return x.id!==id});pruneNodes();save();refreshAll();toast("Pipe deleted");
+}
+
+/* ---------- drawing ---------- */
+var pts=[],tempLine=null,vtxLayer=L.layerGroup().addTo(map);
+function setDrawing(on){
+  drawing=on;document.body.classList.toggle("drawing",on);
+  $("barIdle").style.display=on?"none":"flex";
+  $("barDraw").style.display=on?"flex":"none";
+  map.getContainer().style.cursor=on?"crosshair":"";
+  if(on)showHint("Tap along the pipe in the direction of flow. Tap near a node to connect to it. Tap Finish when done.");else hideHint();
+}
+function showHint(t){var h=$("hint");h.textContent=t;h.style.display="block"}
+function hideHint(){$("hint").style.display="none"}
+function resetDraw(){
+  pts=[];vtxLayer.clearLayers();
+  if(tempLine){map.removeLayer(tempLine);tempLine=null}
+}
+function addPt(ll){
+  var n=nearestNode(ll,SNAP_PX);
+  if(n){ll=L.latLng(n.lat,n.lng);toast("Connected to node "+n.name)}
+  var last=pts[pts.length-1];
+  if(last&&hav(last,[ll.lat,ll.lng])<0.3)return;
+  pts.push([ll.lat,ll.lng]);
+  L.marker(ll,{interactive:false,keyboard:false,icon:L.divIcon({className:"vtx",iconSize:[12,12],iconAnchor:[6,6]})}).addTo(vtxLayer);
+  if(tempLine)tempLine.setLatLngs(pts);else tempLine=L.polyline(pts,{color:"#fff",weight:4,dashArray:"8 6",interactive:false}).addTo(map);
+  showHint(pts.length+" point"+(pts.length>1?"s":"")+" | "+Math.round(lineLen(pts))+" m so far");
+}
+map.on("click",function(e){
+  if(drawing){addPt(e.latlng);return}
+  var n=nearestNode(e.latlng,SNAP_PX);if(n)openNodePopup(n);
+});
+$("btnDraw").onclick=function(){map.closePopup();$("sheet").classList.remove("open");resetDraw();setDrawing(true)};
+$("btnCancel").onclick=function(){resetDraw();setDrawing(false)};
+$("btnUndo").onclick=function(){
+  if(!pts.length)return;
+  pts.pop();
+  var layers=vtxLayer.getLayers();if(layers.length)vtxLayer.removeLayer(layers[layers.length-1]);
+  if(tempLine){if(pts.length)tempLine.setLatLngs(pts);else{map.removeLayer(tempLine);tempLine=null}}
+  showHint(pts.length+" point(s) | "+Math.round(lineLen(pts))+" m so far");
+};
+$("btnFinish").onclick=function(){
+  if(pts.length<2){toast("Add at least 2 points");return}
+  openForm(null);
+};
+
+/* ---------- GPS ---------- */
+var gpsMarker=null,gpsRing=null;
+function gpsError(err){
+  if(!window.isSecureContext){toast("GPS needs an https page. Open the GitHub Pages link.");return}
+  if(err&&err.code===1){toast("Location blocked. Tap the lock icon in the address bar > Permissions > Location > Allow");return}
+  if(err&&err.code===2){toast("Phone cannot find location. Turn on device Location and go outside.");return}
+  toast("Location timed out. Try again.");
+}
+function getPos(cb){
+  if(!navigator.geolocation){toast("GPS not available in this browser");return}
+  if(!window.isSecureContext){gpsError();return}
+  toast("Getting location...");
+  navigator.geolocation.getCurrentPosition(
+    function(pos){cb(L.latLng(pos.coords.latitude,pos.coords.longitude),pos.coords.accuracy)},
+    function(err){
+      if(err.code===3){
+        navigator.geolocation.getCurrentPosition(function(pos){cb(L.latLng(pos.coords.latitude,pos.coords.longitude),pos.coords.accuracy)},gpsError,{enableHighAccuracy:false,timeout:15000,maximumAge:60000});
+      }else gpsError(err);
+    },{enableHighAccuracy:true,timeout:12000,maximumAge:2000});
+}
+$("btnGps").onclick=function(){
+  getPos(function(ll,acc){
+    map.setView(ll,19);
+    if(gpsMarker)map.removeLayer(gpsMarker);if(gpsRing)map.removeLayer(gpsRing);
+    gpsRing=L.circle(ll,{radius:acc,color:"#2979ff",weight:1,fillOpacity:.12,interactive:false}).addTo(map);
+    gpsMarker=L.circleMarker(ll,{radius:8,color:"#fff",weight:3,fillColor:"#2979ff",fillOpacity:1,interactive:false}).addTo(map);
+    toast("Accuracy about "+Math.round(acc)+" m");
+  });
+};
+$("btnAddGps").onclick=function(){getPos(function(ll){addPt(ll);map.panTo(ll)})};
+
+/* ---------- form ---------- */
+var editingId=null;
+(function buildSwatches(){
+  var h='<div><input type="radio" name="col" id="c_def" value=""><label for="c_def"><i id="defSw"></i>Default</label></div>';
+  EXTRA.forEach(function(k){
+    h+='<div><input type="radio" name="col" id="c_'+k+'" value="'+k+'"><label for="c_'+k+'"><i style="background:'+PAL[k].s+'"></i>'+k.charAt(0).toUpperCase()+k.slice(1)+'</label></div>';
+  });
+  $("cols").innerHTML=h;
+})();
+function curStatus(){var r=document.querySelector("input[name=stat]:checked");return r?r.value:""}
+function syncDefSw(){var s=curStatus();$("defSw").style.background=s?PAL[STATUS[s].key].s:"#888"}
+$("modalWrap").addEventListener("change",function(e){if(e.target.name==="stat")syncDefSw()});
+function openForm(id){
+  editingId=id;
+  var p=id?pipes.find(function(x){return x.id===id}):null;
+  var coords=p?p.coords:pts;
+  $("mTitle").textContent=p?"Edit pipe":"New pipe";
+  $("mLen").textContent="Length: "+Math.round(lineLen(coords))+" m (measured from the line)";
+  $("sEx").checked=!!p&&p.status==="existing";
+  $("sRq").checked=!!p&&p.status==="required";
+  var ck=$("c_"+(p&&p.color?p.color:"def"));if(ck)ck.checked=true;
+  $("fDia").value=p?p.dia:"";
+  $("fDepth").value=p?p.depth:"";
+  $("fUnit").value=p?p.unit:(pipes.length?pipes[pipes.length-1].unit:"ft");
+  syncDefSw();
+  $("modalWrap").classList.add("open");
+}
+function closeForm(){$("modalWrap").classList.remove("open")}
+$("mCancel").onclick=closeForm;
+$("mSave").onclick=function(){
+  var st=curStatus();
+  if(!st){toast("Pick Existing or Required");return}
+  var dia=$("fDia").value;
+  if(!dia){toast("Select a diameter");return}
+  var ce=document.querySelector("input[name=col]:checked"),col=ce?ce.value:"";
+  var old=editingId?pipes.find(function(x){return x.id===editingId}):null;
+  var coords=old?old.coords:pts.slice();
+  var rec={
+    id:old?old.id:("p"+Date.now().toString(36)),
+    status:st,color:col,dia:dia,depth:$("fDepth").value,unit:$("fUnit").value,
+    coords:coords,length:lineLen(coords),ts:old?old.ts:new Date().toISOString(),
+    n1:old?old.n1:ensureNode(coords[0]),n2:old?old.n2:ensureNode(coords[coords.length-1])
+  };
+  if(old){pipes=pipes.map(function(x){return x.id===old.id?rec:x})}else{pipes.push(rec)}
+  save();closeForm();
+  if(!old){resetDraw();setDrawing(false)}
+  refreshAll();
+  toast("Saved "+nodeName(rec.n1)+" to "+nodeName(rec.n2)+": "+labelText(rec));
+};
+
+/* ---------- list ---------- */
+function renderList(){
+  var te=0,tr=0;
+  pipes.forEach(function(p){if(p.status==="required")tr+=p.length;else te+=p.length});
+  $("totals").innerHTML="<span style='border-color:var(--blue)'>Existing: "+Math.round(te)+" m</span><span style='border-color:var(--red)'>Required: "+Math.round(tr)+" m</span><span>Nodes: "+nodes.length+"</span>";
+  var l=$("list");
+  if(!pipes.length){l.innerHTML="<div class='empty'>No pipes yet. Tap Draw pipe, trace the route, then fill in the details.</div>";return}
+  l.innerHTML=pipes.slice().reverse().map(function(p){
+    return "<div class='row'><div class='sw' style='background:"+PAL[colorKey(p)].s+"'></div><div class='main'><div class='t'>"+esc(nodeName(p.n1))+" &rarr; "+esc(nodeName(p.n2))+"</div><div class='s'>"+esc(STATUS[p.status].label)+" | "+esc(labelText(p))+" | depth "+esc(p.depth===""?"-":p.depth+" "+p.unit)+"</div></div>"+
+    "<button data-a='go' data-id='"+esc(p.id)+"' aria-label='Show on map'>Go</button><button data-a='ed' data-id='"+esc(p.id)+"' aria-label='Edit'>Edit</button><button data-a='rm' data-id='"+esc(p.id)+"' aria-label='Delete'>Del</button></div>";
+  }).join("");
+}
+$("list").addEventListener("click",function(e){
+  var b=e.target.closest("button[data-a]");if(!b)return;
+  var id=b.dataset.id,p=pipes.find(function(x){return x.id===id});if(!p)return;
+  if(b.dataset.a==="go"){$("sheet").classList.remove("open");map.fitBounds(L.latLngBounds(p.coords),{maxZoom:19,padding:[40,40]})}
+  if(b.dataset.a==="ed"){$("sheet").classList.remove("open");openForm(id)}
+  if(b.dataset.a==="rm")delPipe(id);
+});
+$("btnList").onclick=function(){refreshAll();$("sheet").classList.add("open")};
+$("btnCloseSheet").onclick=function(){$("sheet").classList.remove("open")};
+$("fPrefix").onchange=function(){
+  prefix=$("fPrefix").value.trim();nextNo=1;save();
+  toast("New nodes will be named like "+prefix+"1, "+prefix+"2 ...");
+};
+$("btnRenum").onclick=function(){
+  if(!nodes.length){toast("No nodes yet");return}
+  prefix=$("fPrefix").value.trim();
+  if(!confirm("Rename all "+nodes.length+" nodes as "+prefix+"1, "+prefix+"2 ... in the order they were created? Custom names will be replaced."))return;
+  nodes.forEach(function(n,i){n.name=prefix+(i+1)});
+  nextNo=nodes.length+1;save();refreshAll();toast("Nodes renumbered");
+};
+
+/* ---------- export ---------- */
+function download(name,text,mime){
+  var blob=new Blob([text],{type:mime});var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);
+}
+function stamp(){return new Date().toISOString().slice(0,10)}
+function kmlColor(hex){return "ff"+hex.slice(5,7)+hex.slice(3,5)+hex.slice(1,3)}
+function buildKml(){
+  var out=['<?xml version="1.0" encoding="UTF-8"?>','<kml xmlns="http://www.opengis.net/kml/2.2"><Document>','<name>Village water pipelines</name>'];
+  Object.keys(PAL).forEach(function(k){
+    out.push('<Style id="c_'+k+'"><LineStyle><color>'+kmlColor(PAL[k].s)+'</color><width>4</width></LineStyle><LabelStyle><color>ffffffff</color><scale>0.9</scale></LabelStyle></Style>');
+  });
+  out.push('<Style id="node"><IconStyle><scale>0.6</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon></IconStyle><LabelStyle><color>ffffffff</color><scale>1</scale></LabelStyle></Style>');
+  ["existing","required"].forEach(function(s){
+    var g=pipes.filter(function(p){return p.status===s});if(!g.length)return;
+    out.push('<Folder><name>'+STATUS[s].label+' pipes</name>');
+    g.forEach(function(p){
+      var depth=p.depth===""?"-":p.depth+" "+p.unit;
+      out.push('<Placemark><name>'+esc(labelText(p))+'</name><styleUrl>#c_'+colorKey(p)+'</styleUrl>'+
+        '<description><![CDATA[From node: '+esc(nodeName(p.n1))+'<br>To node: '+esc(nodeName(p.n2))+'<br>Status: '+STATUS[s].label+'<br>Diameter: '+p.dia+' inch<br>Length: '+Math.round(p.length)+' m<br>Depth: '+esc(depth)+']]></description>'+
+        '<ExtendedData><Data name="from_node"><value>'+esc(nodeName(p.n1))+'</value></Data><Data name="to_node"><value>'+esc(nodeName(p.n2))+'</value></Data><Data name="status"><value>'+STATUS[s].label+'</value></Data><Data name="dia_inch"><value>'+p.dia+'</value></Data><Data name="depth"><value>'+esc(depth)+'</value></Data><Data name="length_m"><value>'+Math.round(p.length)+'</value></Data></ExtendedData>'+
+        '<LineString><tessellate>1</tessellate><altitudeMode>clampToGround</altitudeMode><coordinates>'+
+        p.coords.map(function(c){return c[1].toFixed(7)+","+c[0].toFixed(7)+",0"}).join(" ")+
+        '</coordinates></LineString></Placemark>');
+    });
+    out.push('</Folder>');
+  });
+  if(nodes.length){
+    out.push('<Folder><name>Nodes</name>');
+    nodes.forEach(function(n){
+      out.push('<Placemark><name>'+esc(n.name)+'</name><styleUrl>#node</styleUrl><Point><coordinates>'+n.lng.toFixed(7)+','+n.lat.toFixed(7)+',0</coordinates></Point></Placemark>');
+    });
+    out.push('</Folder>');
+  }
+  out.push('</Document></kml>');
+  return out.join("\n");
+}
+function csvCell(v){v=String(v==null?"":v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+$("btnKml").onclick=function(){if(!pipes.length){toast("Nothing to export");return}download("pipelines_"+stamp()+".kml",buildKml(),"application/vnd.google-earth.kml+xml")};
+$("btnCsv").onclick=function(){
+  if(!pipes.length){toast("Nothing to export");return}
+  var rows=[["No","From node","To node","Status","Dia (inch)","Length (m)","Depth","Depth unit","From lat","From lng","To lat","To lng"]];
+  pipes.forEach(function(p,i){
+    var a=nodeById(p.n1),b=nodeById(p.n2);
+    rows.push([i+1,nodeName(p.n1),nodeName(p.n2),STATUS[p.status].label,p.dia,Math.round(p.length),p.depth,p.unit,a?a.lat.toFixed(6):"",a?a.lng.toFixed(6):"",b?b.lat.toFixed(6):"",b?b.lng.toFixed(6):""]);
+  });
+  download("pipelines_"+stamp()+".csv","\ufeff"+rows.map(function(r){return r.map(csvCell).join(",")}).join("\n"),"text/csv");
+};
+$("btnJson").onclick=function(){download("pipelines_backup_"+stamp()+".json",JSON.stringify({v:2,pipes:pipes,nodes:nodes,prefix:prefix,next:nextNo}),"application/json")};
+$("btnImport").onclick=function(){$("fileIn").click()};
+$("fileIn").onchange=function(e){
+  var f=e.target.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var data=JSON.parse(r.result);
+      if(!Array.isArray(data)&&!(data&&Array.isArray(data.pipes)))throw 0;
+      var n=Array.isArray(data)?data.length:data.pipes.length;
+      if(!confirm("Replace the pipes on this device with the "+n+" pipes in this backup?"))return;
+      setState(data);save();refreshAll();
+      if(pipes.length){var b=L.latLngBounds([]);pipes.forEach(function(p){p.coords.forEach(function(c){b.extend(c)})});map.fitBounds(b,{padding:[40,40],maxZoom:18})}
+      toast("Backup restored");
+    }catch(err){toast("That file is not a valid backup")}
+  };
+  r.readAsText(f);e.target.value="";
+};
+$("btnClear").onclick=function(){
+  if(!pipes.length)return;
+  if(confirm("Delete all "+pipes.length+" pipes and "+nodes.length+" nodes from this device? Download a backup first.")){pipes=[];nodes=[];nextNo=1;save();refreshAll()}
+};
+
+/* ---------- printable drawing (plain map, no imagery) ---------- */
+function f2(n){return Math.round(n*100)/100}
+function alongPts(pm,d){
+  var acc=0,i,a,b,l,f;
+  for(i=1;i<pm.length;i++){
+    a=pm[i-1];b=pm[i];l=Math.hypot(b[0]-a[0],b[1]-a[1]);
+    if(acc+l>=d||i===pm.length-1){
+      f=l?Math.min(Math.max((d-acc)/l,0),1):0;
+      return {x:a[0]+(b[0]-a[0])*f,y:a[1]+(b[1]-a[1])*f,a:Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI};
+    }
+    acc+=l;
+  }
+  return {x:pm[0][0],y:pm[0][1],a:0};
+}
+function segHitsRect(ax,ay,bx,by,x0,y0,x1,y1){
+  var dx=bx-ax,dy=by-ay,p=[-dx,dx,-dy,dy],q=[ax-x0,x1-ax,ay-y0,y1-ay],u1=0,u2=1,i,t;
+  for(i=0;i<4;i++){
+    if(p[i]===0){if(q[i]<0)return false}
+    else{t=q[i]/p[i];if(p[i]<0){if(t>u2)return false;if(t>u1)u1=t}else{if(t<u2){if(t<u1)return false;u2=t}}}
+  }
+  return true;
+}
+function haloText(attrs,size,txt){
+  return '<text '+attrs+' font-size="'+size+'" font-weight="700" fill="#fff" stroke="#fff" stroke-width="1.1" stroke-linejoin="round">'+txt+'</text>'+
+         '<text '+attrs+' font-size="'+size+'" font-weight="700" fill="#111">'+txt+'</text>';
+}
+function getHdr(){var h={};try{h=JSON.parse(localStorage.getItem(HKEY)||"{}")||{}}catch(e){}return h}
+function buildDrawing(){
+  var hdr={title:$("pTitle").value,sub:$("pSub").value,by:$("pBy").value,nodes:$("pNodes").value,lbl:$("pLbl").value,font:$("pFont").value};
+  try{localStorage.setItem(HKEY,JSON.stringify(hdr))}catch(e){}
+  var title=hdr.title.trim()||"Village Water Pipeline Map";
+
+  var all=[];pipes.forEach(function(p){p.coords.forEach(function(c){all.push(c)})});
+  var lat0=0,lng0=1e9;
+  all.forEach(function(c){lat0+=c[0];if(c[1]<lng0)lng0=c[1]});
+  lat0/=all.length;
+  var kx=111320*Math.cos(lat0*Math.PI/180),ky=110574;
+  function prj(c){return [(c[1]-lng0)*kx,-(c[0]-lat0)*ky]}
+  var proj=pipes.map(function(p){return p.coords.map(prj)});
+  var minx=1e12,maxx=-1e12,miny=1e12,maxy=-1e12;
+  proj.forEach(function(pm){pm.forEach(function(q){minx=Math.min(minx,q[0]);maxx=Math.max(maxx,q[0]);miny=Math.min(miny,q[1]);maxy=Math.max(maxy,q[1])})});
+  var bw=Math.max(maxx-minx,20),bh=Math.max(maxy-miny,20);
+
+  var combos=[],totalLen=0;
+  ["existing","required"].forEach(function(s){DIAS.forEach(function(d){
+    var g=pipes.filter(function(p){return p.status===s&&p.dia===d});
+    if(g.length){var tl=0;g.forEach(function(p){tl+=p.length});combos.push({s:s,d:d,n:g.length,l:tl})}
+  })});
+  pipes.forEach(function(p){totalLen+=p.length});
+
+  var paper=$("pPaper").value,sz=paper==="A3"?[420,297]:[297,210];
+  var o=$("pOrient").value;if(o==="auto")o=bw>=bh?"landscape":"portrait";
+  var W=o==="landscape"?sz[0]:sz[1],H=o==="landscape"?sz[1]:sz[0];
+  var M=6,HEAD=16,FOOT=Math.max(40,26+5*combos.length),PAD=9;
+  var mx0=M+3,my0=M+HEAD,mx1=W-M-3,my1=H-M-FOOT-2,fy=H-M-FOOT;
+  var sc=Math.min((mx1-mx0-2*PAD)/bw,(my1-my0-2*PAD)/bh);
+  var ox=(mx0+mx1)/2-((minx+maxx)/2)*sc,oy=(my0+my1)/2-((miny+maxy)/2)*sc;
+  var fs=W>300?3.2:2.7;
+
+  var out=['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" font-family="Arial,Helvetica,sans-serif">',
+    '<rect width="'+W+'" height="'+H+'" fill="#fff"/>',
+    '<defs><clipPath id="mc"><rect x="'+mx0+'" y="'+my0+'" width="'+(mx1-mx0)+'" height="'+(my1-my0)+'"/></clipPath></defs>',
+    '<rect x="'+M+'" y="'+M+'" width="'+(W-2*M)+'" height="'+(H-2*M)+'" fill="none" stroke="#000" stroke-width="0.6"/>',
+    '<rect x="'+mx0+'" y="'+my0+'" width="'+(mx1-mx0)+'" height="'+(my1-my0)+'" fill="#fff" stroke="#777" stroke-width="0.3"/>'];
+
+  /* header */
+  out.push('<text x="'+(M+4)+'" y="'+(M+8.5)+'" font-size="6.5" font-weight="700" fill="#111">'+esc(title)+'</text>');
+  if(hdr.sub.trim())out.push('<text x="'+(M+4)+'" y="'+(M+13.2)+'" font-size="3.4" fill="#222">'+esc(hdr.sub.trim())+'</text>');
+  out.push('<text x="'+(W-M-4)+'" y="'+(M+8.5)+'" font-size="3.2" text-anchor="end" fill="#333">Date: '+esc(new Date().toLocaleDateString("en-GB"))+'</text>');
+  if(hdr.by.trim())out.push('<text x="'+(W-M-4)+'" y="'+(M+13.2)+'" font-size="3.2" text-anchor="end" fill="#333">Prepared by: '+esc(hdr.by.trim())+'</text>');
+
+  /* map content */
+  var showNodes=$("pNodes").value,lblMode=$("pLbl").value;
+  fs=fs*(parseFloat($("pFont").value)||1);
+  var pms=proj.map(function(pr){return pr.map(function(q){return [q[0]*sc+ox,q[1]*sc+oy]})});
+  var segs=[],boxes=[];
+  pms.forEach(function(pm){for(var k=1;k<pm.length;k++)segs.push([pm[k-1][0],pm[k-1][1],pm[k][0],pm[k][1]])});
+  function polyOf(cx,cy,ang,hw,hh){
+    var r=ang*Math.PI/180,c=Math.cos(r),sn=Math.sin(r);
+    return [[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh]].map(function(q){return [cx+q[0]*c-q[1]*sn,cy+q[0]*sn+q[1]*c]});
+  }
+  function sat(A,B){
+    var polys=[A,B],pi,i,j,P,ax,ay,mn1,mx1,mn2,mx2;
+    function proj1(Q){var mn=1e9,mx=-1e9;Q.forEach(function(q){var d=q[0]*ax+q[1]*ay;if(d<mn)mn=d;if(d>mx)mx=d});return [mn,mx]}
+    for(pi=0;pi<2;pi++){
+      P=polys[pi];
+      for(i=0;i<P.length;i++){
+        j=(i+1)%P.length;ax=-(P[j][1]-P[i][1]);ay=P[j][0]-P[i][0];
+        var r1=proj1(A),r2=proj1(B);
+        if(r1[1]<=r2[0]||r2[1]<=r1[0])return false;
+      }
+    }
+    return true;
+  }
+  function polyHit(poly){for(var i=0;i<boxes.length;i++){if(sat(poly,boxes[i]))return true}return false}
+  function segHit(cx,cy,ang,hw,hh){
+    var r=ang*Math.PI/180,co=Math.cos(r),si=Math.sin(r),n=0;
+    for(var i=0;i<segs.length;i++){
+      var sg=segs[i];
+      var ax=(sg[0]-cx)*co+(sg[1]-cy)*si,ay=-(sg[0]-cx)*si+(sg[1]-cy)*co;
+      var bx=(sg[2]-cx)*co+(sg[3]-cy)*si,by=-(sg[2]-cx)*si+(sg[3]-cy)*co;
+      if(segHitsRect(ax,ay,bx,by,-hw,-hh,hw,hh))n++;
+    }
+    return n;
+  }
+  function scoreRect(cx,cy,ang,hw,hh){
+    var poly=polyOf(cx,cy,ang,hw+0.3,hh+0.3);
+    var sco=segHit(cx,cy,ang,hw,hh)*2+(polyHit(poly)?3:0);
+    for(var i=0;i<4;i++){if(poly[i][0]<mx0+1||poly[i][0]>mx1-1||poly[i][1]<my0+1||poly[i][1]>my1-1){sco+=1;break}}
+    return {s:sco,poly:poly};
+  }
+  var pipeOut=[],arrows=[],nodeOut=[],labOut=[];
+
+  /* pipes and arrows */
+  pipes.forEach(function(p,i){
+    var pm=pms[i];
+    pipeOut.push('<polyline points="'+pm.map(function(q){return f2(q[0])+","+f2(q[1])}).join(" ")+'" fill="none" stroke="'+PAL[colorKey(p)].p+'" stroke-width="'+(PWID[p.dia]||1)+'" stroke-linejoin="round"/>');
+    var L=0;for(var k=1;k<pm.length;k++)L+=Math.hypot(pm[k][0]-pm[k-1][0],pm[k][1]-pm[k-1][1]);
+    if(L>6){
+      var n=Math.max(1,Math.floor(L/30));
+      for(var j=0;j<n;j++){var a=alongPts(pm,L*(j+0.5)/n);arrows.push('<polygon points="1.5,0 -1.2,1.2 -1.2,-1.2" transform="translate('+f2(a.x)+' '+f2(a.y)+') rotate('+f2(a.a)+')" fill="#111" stroke="#fff" stroke-width="0.25"/>')}
+    }
+  });
+
+  /* node circles reserve their space first */
+  var pos=[];
+  if(showNodes!=="none"){
+    pos=nodes.map(function(nd){var q=prj([nd.lat,nd.lng]);return {n:nd,x:q[0]*sc+ox,y:q[1]*sc+oy}});
+    pos.forEach(function(o){boxes.push(polyOf(o.x,o.y,0,1.7,1.7));nodeOut.push('<circle cx="'+f2(o.x)+'" cy="'+f2(o.y)+'" r="1.3" fill="#fff" stroke="#111" stroke-width="0.5"/>')});
+  }
+
+  /* pipe labels placed where they collide least (smaller text as a fallback) */
+  if(lblMode!=="none"){
+    pipes.forEach(function(p,i){
+      var pm=pms[i],L=0;for(var k=1;k<pm.length;k++)L+=Math.hypot(pm[k][0]-pm[k-1][0],pm[k][1]-pm[k-1][1]);
+      var txt=lblMode==="len"?Math.round(p.length)+" m":p.dia+"\" | "+Math.round(p.length)+" m";
+      var best=null;
+      [1,0.82].forEach(function(zoom){
+        if(best&&best.s===0)return;
+        var f=fs*zoom,hw=txt.length*f*0.58/2+0.8,hh=f*0.62,off=hh+1.1;
+        [0.5,0.4,0.6,0.3,0.7,0.2,0.8,0.12,0.88].forEach(function(t){
+          var m=alongPts(pm,L*t),ang=m.a;if(ang>90)ang-=180;if(ang<-90)ang+=180;
+          var r=ang*Math.PI/180,ux=Math.sin(r),uy=-Math.cos(r);
+          [1,-1].forEach(function(sd){
+            var cx=m.x+ux*off*sd,cy=m.y+uy*off*sd,res=scoreRect(cx,cy,ang,hw,hh);
+            if(!best||res.s<best.s)best={s:res.s,poly:res.poly,x:cx,y:cy,a:ang,hw:hw,hh:hh,f:f};
+          });
+        });
+      });
+      boxes.push(best.poly);
+      labOut.push('<g transform="translate('+f2(best.x)+' '+f2(best.y)+') rotate('+f2(best.a)+')"><rect x="'+f2(-best.hw)+'" y="'+f2(-best.hh)+'" width="'+f2(2*best.hw)+'" height="'+f2(2*best.hh)+'" fill="#fff" fill-opacity="0.85"/><text y="'+f2(best.f*0.35)+'" text-anchor="middle" font-size="'+f2(best.f)+'" font-weight="700" fill="#111">'+esc(txt)+'</text></g>');
+    });
+  }
+
+  /* node names last, around the circles */
+  if(showNodes==="names"){
+    var nfs=f2(fs*1.1);
+    pos.forEach(function(o){
+      var hw=o.n.name.length*nfs*0.6/2+0.7,hh=nfs*0.62,g=2.2,best=null;
+      [[g+hw,-g-hh],[-g-hw,-g-hh],[g+hw,g+hh],[-g-hw,g+hh],[g+hw,0],[-g-hw,0],[0,-g-hh],[0,g+hh]].forEach(function(c){
+        var r=scoreRect(o.x+c[0],o.y+c[1],0,hw,hh);
+        if(!best||r.s<best.s)best={s:r.s,poly:r.poly,x:o.x+c[0],y:o.y+c[1]};
+      });
+      boxes.push(best.poly);
+      nodeOut.push('<rect x="'+f2(best.x-hw)+'" y="'+f2(best.y-hh)+'" width="'+f2(2*hw)+'" height="'+f2(2*hh)+'" fill="#fff" fill-opacity="0.85"/>');
+      nodeOut.push('<text x="'+f2(best.x)+'" y="'+f2(best.y+nfs*0.35)+'" text-anchor="middle" font-size="'+nfs+'" font-weight="700" fill="#000">'+esc(o.n.name)+'</text>');
+    });
+  }
+
+  out.push('<g clip-path="url(#mc)">');
+  out=out.concat(pipeOut,arrows,nodeOut,labOut);
+  out.push('</g>');
+
+  /* north arrow */
+  var nx=mx1-10,ny=my0+17;
+  out.push('<g><polygon points="'+nx+','+(ny-9)+' '+(nx+3.5)+','+(ny+3)+' '+nx+','+(ny+1)+' '+(nx-3.5)+','+(ny+3)+'" fill="#111"/><text x="'+nx+'" y="'+(ny-11)+'" text-anchor="middle" font-size="4.5" font-weight="700" fill="#111">N</text></g>');
+
+  /* footer summary */
+  out.push('<line x1="'+M+'" y1="'+fy+'" x2="'+(W-M)+'" y2="'+fy+'" stroke="#000" stroke-width="0.4"/>');
+  out.push('<text x="'+(M+4)+'" y="'+(fy+6)+'" font-size="3.6" font-weight="700" fill="#111">Pipe summary</text>');
+  var X1=M+4,X2=M+17,X3=M+72,X4=M+104,ry=fy+12;
+  out.push('<text x="'+X2+'" y="'+ry+'" font-size="2.9" font-weight="700" fill="#333">Status | Diameter</text><text x="'+X3+'" y="'+ry+'" font-size="2.9" font-weight="700" text-anchor="end" fill="#333">Pipes</text><text x="'+X4+'" y="'+ry+'" font-size="2.9" font-weight="700" text-anchor="end" fill="#333">Length (m)</text>');
+  out.push('<line x1="'+X1+'" y1="'+(ry+1.5)+'" x2="'+(X4+1)+'" y2="'+(ry+1.5)+'" stroke="#999" stroke-width="0.2"/>');
+  ry+=5.5;
+  combos.forEach(function(c){
+    out.push('<line x1="'+X1+'" y1="'+(ry-1)+'" x2="'+(X1+10)+'" y2="'+(ry-1)+'" stroke="'+PAL[STATUS[c.s].key].p+'" stroke-width="'+(PWID[c.d]*1.4)+'"/>');
+    out.push('<text x="'+X2+'" y="'+ry+'" font-size="3.2" fill="#111">'+STATUS[c.s].label+' | '+c.d+'&quot; dia</text><text x="'+X3+'" y="'+ry+'" font-size="3.2" text-anchor="end" fill="#111">'+c.n+'</text><text x="'+X4+'" y="'+ry+'" font-size="3.2" text-anchor="end" fill="#111">'+Math.round(c.l)+'</text>');
+    ry+=5;
+  });
+  out.push('<line x1="'+X1+'" y1="'+(ry-3.6)+'" x2="'+(X4+1)+'" y2="'+(ry-3.6)+'" stroke="#999" stroke-width="0.2"/>');
+  out.push('<text x="'+X2+'" y="'+(ry-0.2)+'" font-size="3.2" font-weight="700" fill="#111">Total</text><text x="'+X3+'" y="'+(ry-0.2)+'" font-size="3.2" font-weight="700" text-anchor="end" fill="#111">'+pipes.length+'</text><text x="'+X4+'" y="'+(ry-0.2)+'" font-size="3.2" font-weight="700" text-anchor="end" fill="#111">'+Math.round(totalLen)+'</text>');
+
+  /* notes + scale bar */
+  var rx=W-M-4;
+  out.push('<text x="'+rx+'" y="'+(fy+8)+'" font-size="2.9" text-anchor="end" fill="#111">Arrows show direction of flow</text>');
+  var ny2=fy+12.5;
+  if(lblMode!=="none"){out.push('<text x="'+rx+'" y="'+ny2+'" font-size="2.9" text-anchor="end" fill="#111">Pipe label: '+(lblMode==="len"?"length":"diameter | length")+'</text>');ny2+=4.5}
+  if(showNodes!=="none"){out.push('<text x="'+rx+'" y="'+ny2+'" font-size="2.9" text-anchor="end" fill="#111">Circles are nodes</text>')}
+  var target=45/sc,nices=[1,2,5,10,20,25,50,100,200,250,500,1000,2000,5000],nice=nices[0];
+  nices.forEach(function(v){if(v<=target)nice=v});
+  var bwid=nice*sc,bx=W-M-8-bwid,by=fy+FOOT-13;
+  out.push('<rect x="'+f2(bx)+'" y="'+by+'" width="'+f2(bwid/2)+'" height="2" fill="#111" stroke="#111" stroke-width="0.25"/><rect x="'+f2(bx+bwid/2)+'" y="'+by+'" width="'+f2(bwid/2)+'" height="2" fill="#fff" stroke="#111" stroke-width="0.25"/>');
+  out.push('<text x="'+f2(bx)+'" y="'+(by+6)+'" font-size="2.9" text-anchor="middle" fill="#111">0</text><text x="'+f2(bx+bwid/2)+'" y="'+(by+6)+'" font-size="2.9" text-anchor="middle" fill="#111">'+(nice/2)+'</text><text x="'+f2(bx+bwid)+'" y="'+(by+6)+'" font-size="2.9" text-anchor="middle" fill="#111">'+nice+' m</text>');
+  out.push('</svg>');
+
+  $("pStage").innerHTML=out.join("\n");
+  var pv=$("printView");pv.style.setProperty("--pw",W+"mm");pv.style.setProperty("--ph",H+"mm");
+  $("pageStyle").textContent="@page{size:"+paper+" "+o+";margin:0}";
+}
+$("btnPrintMap").onclick=function(){
+  if(!pipes.length){toast("Draw some pipes first");return}
+  $("sheet").classList.remove("open");
+  var h=getHdr();$("pTitle").value=h.title||"";$("pSub").value=h.sub||"";$("pBy").value=h.by||"";if(h.nodes)$("pNodes").value=h.nodes;if(h.lbl)$("pLbl").value=h.lbl;if(h.font)$("pFont").value=h.font;
+  $("printView").classList.add("open");
+  buildDrawing();
+};
+$("pClose").onclick=function(){$("printView").classList.remove("open")};
+$("pTitle").oninput=buildDrawing;$("pSub").oninput=buildDrawing;$("pBy").oninput=buildDrawing;
+$("pPaper").onchange=buildDrawing;$("pNodes").onchange=buildDrawing;$("pLbl").onchange=buildDrawing;$("pFont").onchange=buildDrawing;$("pOrient").onchange=buildDrawing;
+$("pPrint").onclick=function(){buildDrawing();setTimeout(function(){window.print()},150)};
+
+/* ---------- start ---------- */
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+if(location.protocol!=="https:"&&location.hostname!=="localhost"){setTimeout(function(){toast("Open this page from https (GitHub Pages) so GPS and saving work")},800)}
+refreshAll();
+if(pipes.length){var bb=L.latLngBounds([]);pipes.forEach(function(p){p.coords.forEach(function(c){bb.extend(c)})});map.fitBounds(bb,{padding:[40,40],maxZoom:18})}
+})();
+</script>
+</body>
+</html>
