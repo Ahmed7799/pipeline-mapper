@@ -16,8 +16,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-famil
 .bar button.primary{background:var(--accent);color:#06281a;border-color:var(--accent)}
 .bar button.danger{color:#ff8a8a}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #fff;outline-offset:2px}
-.hint{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:10px;right:10px;z-index:1000;background:rgba(16,22,26,.92);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px;display:none}
-.legend{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:10px;z-index:900;background:rgba(16,22,26,.88);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px}
+.hint{position:absolute;top:calc(64px + env(safe-area-inset-top,0px));left:10px;right:10px;z-index:1000;background:rgba(16,22,26,.92);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px;display:none}
+.legend{position:absolute;top:calc(64px + env(safe-area-inset-top,0px));right:10px;z-index:900;background:rgba(16,22,26,.88);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px}
 .legend div{display:flex;align-items:center;gap:8px;margin:3px 0}
 .legend i{display:inline-block;width:26px;height:5px;border-radius:3px}
 body.drawing .legend,body.measuring .legend,body.adjusting .legend{display:none}
@@ -124,6 +124,33 @@ input[type=text],input[type=number],select{width:100%;min-height:46px;border-rad
 .lbtn{width:100%;min-height:52px;border-radius:12px;border:none;background:var(--accent);color:#06281a;font-size:17px;font-weight:800}
 .lbtn:disabled{opacity:.6}
 .lfoot{margin:14px 0 0;text-align:center;color:var(--muted);font-size:12px}
+.ldesc{margin:0 0 6px;text-align:center;color:#b9c9d1;font-size:14px;line-height:1.5}
+.lhow{margin:16px 0 0;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:2px 14px}
+.lhow summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:700;font-size:14px;color:var(--accent)}
+.lhow ol{margin:0 0 12px;padding-left:20px;color:#b9c9d1;font-size:13px;line-height:1.55}
+.lhow li{margin-bottom:6px}
+.lby{margin:18px 0 0;text-align:center;font-size:13px;color:var(--muted)}
+.lby b{color:var(--text)}
+#termsView{position:fixed;inset:0;z-index:8800;background:#10161a;display:none;align-items:flex-start;justify-content:center;padding:18px;overflow:auto}
+.tcard{width:100%;max-width:460px;margin:auto}
+.tcard h1{margin:0 0 2px;font-size:22px;text-align:center}
+.tbody{max-height:52vh;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:4px 14px 10px;background:var(--panel);font-size:13px;line-height:1.55;color:#cfdce2;-webkit-overflow-scrolling:touch}
+.tbody h3{font-size:13px;margin:14px 0 4px;color:#fff}
+.tbody p{margin:0}
+.tchk{display:flex;gap:10px;align-items:flex-start;margin:14px 0 4px;font-size:14px;color:var(--text);cursor:pointer}
+.tchk input{width:22px;height:22px;min-height:0;margin:0;flex:none;accent-color:var(--accent)}
+.acct{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:10px;z-index:1050}
+.achip{display:flex;align-items:center;gap:8px;min-height:44px;max-width:190px;padding:0 14px 0 6px;border-radius:999px;border:1px solid var(--line);background:rgba(16,22,26,.92);color:var(--text);font-weight:700;font-size:13px}
+.achip span.n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.aav{width:32px;height:32px;flex:none;border-radius:50%;background:var(--accent);color:#06281a;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px}
+.apop{position:absolute;right:0;top:52px;width:270px;max-width:calc(100vw - 20px);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;display:none;box-shadow:0 8px 28px rgba(0,0,0,.5)}
+.apop.open{display:block}
+.apop .who{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.apop .who .aav{width:42px;height:42px;font-size:18px}
+.apop .nm{font-weight:800;font-size:15px;overflow:hidden;text-overflow:ellipsis}
+.apop .sb{font-size:12px;color:var(--muted)}
+.apop button{width:100%;min-height:44px;margin-top:6px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-weight:600;font-size:14px;text-align:left;padding:0 12px}
+.apop button.out{color:#ff8a8a}
 .tabs{display:flex;gap:6px;padding:0 12px 8px}
 .tabs button{flex:1;min-height:40px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-weight:700;font-size:13px;padding:0 2px}
 .tabs button.on{background:var(--accent);color:#06281a;border-color:var(--accent)}
@@ -157,11 +184,21 @@ input[type=text],input[type=number],select{width:100%;min-height:46px;border-rad
 </head>
 <body>
 <div id="map"></div>
+<div class="acct" id="acct">
+  <button class="achip" id="achip" aria-haspopup="true" aria-expanded="false"><span class="aav" id="aav">?</span><span class="n" id="achipName">Account</span></button>
+  <div class="apop" id="apop" role="menu">
+    <div class="who"><span class="aav" id="apAv">?</span><div style="min-width:0"><div class="nm" id="apName"></div><div class="sb" id="apSub"></div></div></div>
+    <button id="apProfile">Edit profile</button>
+    <button id="apTerms">Read first (terms)</button>
+    <button id="apOut" class="out">Sign out</button>
+  </div>
+</div>
 <div class="hint" id="hint"></div>
 
 <div class="legend">
   <div><i style="background:var(--blue)"></i>Existing</div>
   <div><i style="background:var(--red)"></i>Required</div>
+  <div><i style="background:repeating-linear-gradient(90deg,var(--blue) 0 8px,transparent 8px 12px)"></i>Pumping main</div>
 </div>
 
 <div class="bar" id="barIdle">
@@ -222,7 +259,12 @@ input[type=text],input[type=number],select{width:100%;min-height:46px;border-rad
   <div class="pane" id="pane-s">
     <div class="grp"><div class="gt">Account</div>
       <div class="note" id="acctName" style="margin:0 0 8px"></div>
+      <button class="wide" id="btnProfile" style="margin-bottom:8px">Edit profile</button>
       <button class="wide" id="btnSignOut">Sign out</button>
+    </div>
+    <div class="grp"><div class="gt">About</div>
+      <div class="note" style="margin:0 0 8px;color:var(--text)"><b>Village Pipeline Mapper</b> <span id="appVer"></span><br>Designed and developed by Ahmed</div>
+      <button class="wide" id="btnTerms">Read first (terms and disclaimer)</button>
     </div>
     <div class="grp"><div class="gt">Project</div>
       <div class="setrow"><select id="fProj" aria-label="Project" style="flex:1;min-height:40px"></select></div>
@@ -364,6 +406,7 @@ input[type=text],input[type=number],select{width:100%;min-height:46px;border-rad
   <div class="lcard">
     <svg class="llogo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#182127"/><path d="M12 46 L26 34 L38 40 L52 18" fill="none" stroke="#2979ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 34 L30 16" fill="none" stroke="#ff1744" stroke-width="4" stroke-linecap="round" stroke-dasharray="6 5"/><circle cx="12" cy="46" r="4.5" fill="#fff"/><circle cx="26" cy="34" r="4.5" fill="#fff"/><circle cx="38" cy="40" r="4.5" fill="#fff"/><circle cx="52" cy="18" r="4.5" fill="#3ddc97"/></svg>
     <h1 id="loginH">Village Pipeline Mapper</h1>
+    <p class="ldesc">Map village water pipelines on satellite imagery, number the nodes automatically and print a clean drawing.</p>
     <p class="lsub">Sign in to continue</p>
     <form id="lForm" autocomplete="on">
       <label for="lUser">Username</label>
@@ -373,7 +416,57 @@ input[type=text],input[type=number],select{width:100%;min-height:46px;border-rad
       <div class="lmsg" id="lMsg" role="alert"></div>
       <button type="submit" class="lbtn" id="lBtn">Sign in</button>
     </form>
+    <details class="lhow">
+      <summary>How it works</summary>
+      <ol>
+        <li><b>Draw.</b> Trace each pipe on the map. Pipes split at nodes and crossings, and nodes are numbered for you.</li>
+        <li><b>Describe.</b> Choose distribution or pumping main, existing or required, material, diameter and depth. Add landmarks such as OHSR and DPS.</li>
+        <li><b>Share.</b> Print the drawing with a summary table, or export KML, CSV and a backup. Your work is saved on this phone and works offline.</li>
+      </ol>
+    </details>
     <p class="lfoot">After the first sign-in the app keeps working offline on this phone.</p>
+    <p class="lby">Designed and developed by <b>Ahmed</b></p>
+  </div>
+</div>
+
+<div id="termsView" role="dialog" aria-labelledby="termsH">
+  <div class="tcard">
+    <h1 id="termsH">Read first</h1>
+    <p class="lsub">Please read this before you start</p>
+    <div class="tbody" id="termsBody" tabindex="0">
+      <h3>1. About this tool</h3>
+      <p>Village Pipeline Mapper is an independent, unofficial tool designed and developed by Ahmed to make field survey and drawing work easier. It is a platform only. It is not an official application of any government department, agency or employer, and nothing produced by it is an official record, approval or sanction.</p>
+      <h3>2. Accuracy and verification</h3>
+      <p>Lengths, positions, diameters, depths and every other output depend on GPS signal, phone sensors, map imagery, how points are tapped on the screen and the information you enter. They are approximate and may contain errors. Verify all measurements and details on site before relying on them for estimates, design, purchase or construction.</p>
+      <h3>3. Not professional advice</h3>
+      <p>The tool does not carry out hydraulic design, structural design, cost estimation or land survey, and it is not a substitute for a qualified engineer or a licensed surveyor. Drawings, tables and exports are working aids and are not certified documents.</p>
+      <h3>4. No warranty</h3>
+      <p>The tool is provided "as is" and "as available", without warranty of any kind, express or implied, including warranties of accuracy, reliability, availability, fitness for a particular purpose and non-infringement. Features may change or stop working without notice.</p>
+      <h3>5. Limitation of liability</h3>
+      <p>To the fullest extent permitted by law, the creator is not liable for any loss, damage, claim or expense, whether direct, indirect, incidental or consequential, including loss of data, wrong measurements, project delays or financial loss, arising from the use of, or the inability to use, this tool. The creator does not provide guaranteed support, does not answer for the results produced, and does not resolve disputes arising from its use. You use the tool at your own risk and responsibility.</p>
+      <h3>6. Your data</h3>
+      <p>Projects are stored only in the browser on your own phone. They are not uploaded to the creator. Clearing browser data, changing phones or removing the browser can erase them, so take backups regularly. You are responsible for the data you enter and for having the right to collect and use it.</p>
+      <h3>7. Third-party services</h3>
+      <p>Map imagery and place names are supplied by third-party providers such as Google, Esri and OpenStreetMap and are subject to their own terms, licences and availability. Using the map sends requests, and your device's IP address, to those providers. The creator does not control them.</p>
+      <h3>8. Access</h3>
+      <p>Access is through a sign-in provided by the creator for your own personal or work use. Do not share the sign-in publicly, misuse the tool or try to bypass the sign-in. Access may be changed or withdrawn at any time.</p>
+      <h3>9. Changes and governing law</h3>
+      <p>These terms may be updated from time to time, and continued use means you accept the current terms. They are governed by the laws of India.</p>
+    </div>
+    <label class="tchk" id="tChkRow"><input type="checkbox" id="tAgree"><span>I have read and understood these terms and agree to them.</span></label>
+    <button class="lbtn" id="tBtn" style="margin-top:12px" disabled>Continue</button>
+  </div>
+</div>
+
+<div class="modalwrap" id="profWrap">
+  <div class="modal" role="dialog" aria-labelledby="profH">
+    <h2 id="profH">Your profile</h2>
+    <div class="len">Saved on this phone. Your name is used as the default "Prepared by" on printed drawings.</div>
+    <label for="pfName">Name</label>
+    <input type="text" id="pfName" maxlength="40" autocomplete="off">
+    <label for="pfDesig">Designation / office (optional)</label>
+    <input type="text" id="pfDesig" maxlength="60" autocomplete="off">
+    <div class="acts"><button id="pfCancel">Cancel</button><button class="primary" id="pfSave">Save profile</button></div>
   </div>
 </div>
 
@@ -463,7 +556,8 @@ function colorKey(p){return p.color&&PAL[p.color]?p.color:STATUS[p.status||"exis
 
 /* ---------- state ---------- */
 var pipes=[],nodes=[],landmarks=[],prefix="",nextNo=1,sourceId="",createdIds=[],hdrData={};
-var settings={diaUnit:"mm",presets:[]},projects={current:"",list:[]};
+var settings={diaUnit:"mm",presets:[],profile:{name:"",desig:""}},projects={current:"",list:[]};
+var APP_VER="v3.0",TERMS_VER="1.0",TM_KEY="pipeline-mapper-terms";
 function newProjId(){return "j"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
 function idxSave(){try{localStorage.setItem(KEYP,JSON.stringify(projects))}catch(e){}}
 function saveSettings(){try{localStorage.setItem(KEYS,JSON.stringify(settings))}catch(e){}}
@@ -595,7 +689,7 @@ function setState(obj){
   pruneNodes();
   if(!nodeById(sourceId))sourceId="";
 }
-function loadSettings(){try{var o=JSON.parse(localStorage.getItem(KEYS)||"null");if(o&&(o.diaUnit==="mm"||o.diaUnit==="inch"))settings.diaUnit=o.diaUnit;if(o&&Array.isArray(o.presets))settings.presets=o.presets}catch(e){}}
+function loadSettings(){try{var o=JSON.parse(localStorage.getItem(KEYS)||"null");if(o&&(o.diaUnit==="mm"||o.diaUnit==="inch"))settings.diaUnit=o.diaUnit;if(o&&Array.isArray(o.presets))settings.presets=o.presets;if(o&&o.profile&&typeof o.profile==="object")settings.profile={name:String(o.profile.name||""),desig:String(o.profile.desig||"")}}catch(e){}}
 function loadProject(id){
   var o=null;try{o=JSON.parse(localStorage.getItem(KEYD+id)||"null")}catch(e){}
   setState(o);
@@ -1652,7 +1746,7 @@ function openPrint(bounds,areaVal){
   if(!pipes.length){toast("Draw some pipes first");return}
   $("sheet").classList.remove("open");
   viewBounds=bounds||map.getBounds();
-  var h=getHdr();$("pTitle").value=h.title||"";$("pSub").value=h.sub||"";$("pBy").value=h.by||"";
+  var h=getHdr();$("pTitle").value=h.title||"";$("pSub").value=h.sub||"";$("pBy").value=h.by||profileBy();
   if(h.nodes)$("pNodes").value=h.nodes;if(h.lbl)$("pLbl").value=h.lbl;if(h.font)$("pFont").value=h.font;if(h.line)$("pLine").value=h.line;if(h.arrow)$("pArrow").value=h.arrow;if(h.lm)$("pLm").value=h.lm;if(h.lmsz)$("pLmSize").value=h.lmsz;if(h.dot)$("pDot").value=h.dot;
   $("pArea").value=areaVal||"all";
   pz=1;renderPresets();
@@ -1817,18 +1911,82 @@ function lockUI(msg){
   $("loginView").style.display="flex";$("lMsg").textContent=msg||"";
   setTimeout(function(){try{$("lUser").focus()}catch(e){}},50);
 }
-function unlockUI(){$("loginView").style.display="none";setTimeout(function(){map.invalidateSize()},50)}
+function unlockUI(fresh){
+  $("loginView").style.display="none";
+  setTimeout(function(){map.invalidateSize()},50);
+  if(fresh){try{localStorage.removeItem(TM_KEY)}catch(e){}}
+  var ack=readJSON(TM_KEY);
+  if(!ack||ack.ver!==TERMS_VER)showTerms("gate");
+}
+function showTerms(mode){
+  var gate=mode==="gate";
+  $("termsView").style.display="flex";
+  $("tChkRow").style.display=gate?"flex":"none";
+  $("tAgree").checked=false;
+  $("tBtn").disabled=gate;
+  $("tBtn").textContent=gate?"Continue":"Close";
+  $("termsBody").scrollTop=0;
+  $("termsView").dataset.mode=mode;
+}
+$("tAgree").onchange=function(){$("tBtn").disabled=!$("tAgree").checked};
+$("tBtn").onclick=function(){
+  if($("termsView").dataset.mode==="gate"){
+    var s=readSession();
+    try{localStorage.setItem(TM_KEY,JSON.stringify({ver:TERMS_VER,user:s?s.user:"",at:Date.now()}))}catch(e){}
+  }
+  $("termsView").style.display="none";
+};
+function profileBy(){var p=settings.profile||{};return (p.name||"")+(p.name&&p.desig?", ":"")+(p.desig||"")}
+function acctRefresh(){
+  var s=readSession(),off=authCfg&&authCfg.enabled===false,p=settings.profile||{};
+  var uname=s?s.user:(off?"Guest":""),name=p.name||uname||"Account";
+  $("achipName").textContent=name;
+  var ini=(name.trim().charAt(0)||"?").toUpperCase();
+  $("aav").textContent=ini;$("apAv").textContent=ini;
+  $("apName").textContent=name;
+  $("apSub").textContent=(p.desig?p.desig+" | ":"")+(s?"Signed in as "+s.user:(off?"Sign-in is off":"Not signed in"));
+  $("apOut").style.display=off?"none":"block";
+}
+function openProfile(){
+  var p=settings.profile||{};
+  $("pfName").value=p.name||"";$("pfDesig").value=p.desig||"";
+  $("apop").classList.remove("open");$("achip").setAttribute("aria-expanded","false");
+  $("profWrap").classList.add("open");
+  setTimeout(function(){$("pfName").focus()},50);
+}
+$("pfCancel").onclick=function(){$("profWrap").classList.remove("open")};
+$("pfSave").onclick=function(){
+  settings.profile={name:$("pfName").value.trim(),desig:$("pfDesig").value.trim()};
+  saveSettings();$("profWrap").classList.remove("open");acctRefresh();toast("Profile saved");
+};
+$("achip").onclick=function(e){
+  e.stopPropagation();
+  var open=!$("apop").classList.contains("open");
+  $("apop").classList.toggle("open",open);$("achip").setAttribute("aria-expanded",open?"true":"false");
+};
+document.addEventListener("click",function(e){
+  if(!$("apop").classList.contains("open"))return;
+  if(e.target.closest&&e.target.closest("#acct"))return;
+  $("apop").classList.remove("open");$("achip").setAttribute("aria-expanded","false");
+});
+$("apProfile").onclick=openProfile;
+$("btnProfile").onclick=openProfile;
+$("apTerms").onclick=function(){$("apop").classList.remove("open");showTerms("view")};
+$("btnTerms").onclick=function(){showTerms("view")};
+$("apOut").onclick=function(){$("apop").classList.remove("open");doSignOut()};
+$("appVer").textContent=APP_VER;
 function updAccount(){
   var off=authCfg&&authCfg.enabled===false,s=readSession();
   $("acctName").textContent=off?"Sign-in is turned off for this app.":(s?"Signed in as "+s.user:"Not signed in");
   $("btnSignOut").style.display=off?"none":"block";
+  acctRefresh();
 }
 function startAuth(){
   fetchAuth(function(cfg){
     authCfg=cfg;
-    if(cfg&&cfg.enabled===false){unlockUI();updAccount();return}
+    if(cfg&&cfg.enabled===false){unlockUI(false);updAccount();return}
     var s=readSession();
-    if(s&&(!cfg||s.hash===cfg.hash)){unlockUI();updAccount();return}
+    if(s&&(!cfg||s.hash===cfg.hash)){unlockUI(false);updAccount();return}
     if(s&&cfg){try{localStorage.removeItem(SES_KEY)}catch(e){}lockUI("The password was changed. Please sign in again.");updAccount();return}
     lockUI(cfg?"":"Cannot load the sign-in settings. Connect to the internet and try again.");updAccount();
   });
@@ -1850,11 +2008,11 @@ $("lForm").onsubmit=function(e){
       $("lBtn").disabled=false;$("lBtn").textContent="Sign in";
       if(!cfg){$("lMsg").textContent="Cannot load the sign-in settings. Check your internet connection.";return}
       authCfg=cfg;
-      if(cfg.enabled===false){unlockUI();updAccount();return}
+      if(cfg.enabled===false){unlockUI(false);updAccount();return}
       var ok=String(cfg.user).toLowerCase()===u&&derive(cfg.salt,p,cfg.iter||3000)===cfg.hash;
       if(ok){
         try{localStorage.setItem(SES_KEY,JSON.stringify({user:cfg.user,hash:cfg.hash,exp:Date.now()+(cfg.days||30)*86400000}));localStorage.removeItem(LK_KEY)}catch(x){}
-        $("lPass").value="";unlockUI();updAccount();toast("Signed in as "+cfg.user);
+        $("lPass").value="";unlockUI(true);updAccount();
       }else{
         lk.fails=(lk.fails||0)+1;if(lk.fails>=5){lk.until=Date.now()+60000;lk.fails=0}
         try{localStorage.setItem(LK_KEY,JSON.stringify(lk))}catch(x){}
@@ -1863,12 +2021,14 @@ $("lForm").onsubmit=function(e){
     },30);
   });
 };
-$("btnSignOut").onclick=function(){
+function doSignOut(){
   if(!confirm("Sign out? Your projects stay saved on this phone."))return;
   try{localStorage.removeItem(SES_KEY)}catch(e){}
   $("sheet").classList.remove("open");$("lUser").value="";$("lPass").value="";
+  $("termsView").style.display="none";
   lockUI("");updAccount();
-};
+}
+$("btnSignOut").onclick=doSignOut;
 window.addEventListener("online",startAuth);
 
 /* ---------- start ---------- */
