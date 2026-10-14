@@ -69,23 +69,78 @@ input[type=text],input[type=number],select{width:100%;min-height:46px;border-rad
 .acts{display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-top:16px}
 .acts button{min-height:50px;border-radius:10px;font-size:16px;font-weight:700;border:1px solid var(--line);background:var(--bg);color:var(--text)}
 .acts button.primary{background:var(--accent);color:#06281a;border-color:var(--accent)}
-#printView{position:fixed;inset:0;z-index:5000;background:#dfe5e9;display:none;flex-direction:column;color:#111}
+#printView{position:fixed;inset:0;z-index:5000;background:#dfe5e9;display:none;flex-direction:column;color:var(--text)}
 #printView.open{display:flex}
-.ptools{display:flex;flex-wrap:wrap;gap:8px;padding:10px;background:var(--panel);border-bottom:1px solid var(--line)}
-.ptools input[type=text]{flex:1 1 100%;min-height:42px}
-.ptools select{flex:1;min-width:90px;min-height:42px}
-.ptools button{flex:1;min-height:46px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:15px;font-weight:700}
-.ptools button.primary{background:var(--accent);color:#06281a;border-color:var(--accent);flex:2}
-.pstage{flex:1;overflow:auto;padding:10px;-webkit-overflow-scrolling:touch}
-.pstage svg{display:block;min-width:760px;width:100%;height:auto;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.pbar{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--panel);border-bottom:1px solid var(--line)}
+.pbar .pt{flex:1;text-align:center;font-weight:700}
+.pb{min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-weight:700;font-size:15px}
+.pb.primary{background:var(--accent);color:#06281a;border-color:var(--accent)}
+.pinfo{padding:6px 12px;font-size:12px;color:var(--muted);background:var(--panel);border-bottom:1px solid var(--line);min-height:28px}
+.pwrap{position:relative;flex:1;min-height:0;display:flex}
+.pstage{flex:1;overflow:auto;padding:10px;-webkit-overflow-scrolling:touch;background:#dfe5e9}
+.pstage svg{display:block;margin:0 auto;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.3);max-width:none;height:auto}
+.pzoom{position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;gap:6px}
+.pzoom button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:rgba(24,33,39,.92);color:var(--text);font-size:18px;font-weight:700}
+.pdrawer{background:var(--panel);border-top:1px solid var(--line)}
+.pgrip{width:100%;min-height:46px;background:none;border:none;color:var(--text);font-weight:700;font-size:14px;padding:0 14px;display:flex;justify-content:space-between;align-items:center}
+.pbody{max-height:46vh;overflow:auto;padding:0 12px 12px}
+.presets{display:flex;gap:6px;flex-wrap:wrap;padding-bottom:8px}
+.presets button{min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:13px;font-weight:600}
+.pchip{display:inline-flex}
+.pchip button:first-child{border-radius:999px 0 0 999px}
+.pchip .px{border-radius:0 999px 999px 0;border-left:none;padding:0 10px}
+.presets .psave{border-style:dashed;color:var(--muted)}
+.ptabs{display:flex;gap:6px;margin-bottom:6px}
+.ptabs button{flex:1;min-height:38px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-weight:700;font-size:13px}
+.ptabs button.on{background:var(--accent);color:#06281a;border-color:var(--accent)}
+.ppane{display:none}
+.ppane.on{display:block}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.ppane label{margin:8px 0 3px}
+.ppane select,.ppane input[type=text]{min-height:42px}
+.ppane .pwide{grid-column:1/-1}
+.ppick{width:100%;min-height:44px;margin-top:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-weight:700}
 @media print{
   html,body{background:#fff!important;height:auto!important;overflow:visible!important}
   body>*:not(#printView){display:none!important}
   #printView{position:static!important;display:block!important;background:#fff;width:var(--pw);height:var(--ph);overflow:hidden}
-  .ptools{display:none!important}
-  .pstage{overflow:visible;padding:0}
-  .pstage svg{min-width:0;width:var(--pw);height:var(--ph);box-shadow:none}
+  .pbar,.pinfo,.pzoom,.pdrawer{display:none!important}
+  .pwrap{display:block}
+  .pstage{overflow:visible;padding:0;background:#fff}
+  .pstage svg{margin:0;width:var(--pw)!important;height:var(--ph)!important;box-shadow:none}
 }
+.sub{font-size:12px;color:var(--muted)}
+#loginView{position:fixed;inset:0;z-index:9000;background:#10161a;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto}
+.lcard{width:100%;max-width:380px}
+.llogo{width:64px;height:64px;margin:0 auto 14px;display:block}
+.lcard h1{margin:0 0 4px;font-size:22px;text-align:center}
+.lsub{margin:0 0 14px;text-align:center;color:var(--muted);font-size:14px}
+.lcard label{margin:12px 0 4px}
+.lcard input{width:100%;min-height:50px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:8px 12px;font-size:16px;font-family:inherit}
+.lpw{position:relative}
+.lpw input{padding-right:70px}
+.lpw button{position:absolute;right:6px;top:6px;min-height:38px;padding:0 10px;border:none;border-radius:8px;background:transparent;color:var(--accent);font-weight:700;font-size:13px}
+.lmsg{min-height:22px;margin:10px 0 2px;color:#ff8a8a;font-size:14px}
+.lbtn{width:100%;min-height:52px;border-radius:12px;border:none;background:var(--accent);color:#06281a;font-size:17px;font-weight:800}
+.lbtn:disabled{opacity:.6}
+.lfoot{margin:14px 0 0;text-align:center;color:var(--muted);font-size:12px}
+.tabs{display:flex;gap:6px;padding:0 12px 8px}
+.tabs button{flex:1;min-height:40px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-weight:700;font-size:13px;padding:0 2px}
+.tabs button.on{background:var(--accent);color:#06281a;border-color:var(--accent)}
+.pane{display:none;flex:1 1 auto;min-height:0;overflow:auto}
+.pane.on{display:block}
+.pane .list{overflow:visible}
+.grp{padding:8px 16px 12px;border-top:1px solid var(--line)}
+.gt{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--muted);margin:4px 0 6px}
+.grp .setrow{padding:0 0 8px}
+.note{color:var(--muted);font-size:12px;margin:6px 0 0}
+.wide{width:100%;min-height:46px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:15px;font-weight:600}
+.wide.danger{color:#ff8a8a}
+.exp1{display:grid;gap:10px;padding:14px 16px 18px}
+.exp1 button{min-height:54px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:10px;font-size:15px;font-weight:700;text-align:left;padding:6px 14px}
+.exp1 button small{display:block;font-weight:400;color:var(--muted);font-size:12px;margin-top:2px}
+.exp1 button.primary{background:var(--accent);color:#06281a;border-color:var(--accent)}
+.exp1 button.primary small{color:#0c4a31}
 .lmic svg{position:absolute;left:-17px;top:-17px;overflow:visible}
 .lmic b{position:absolute;left:0;top:19px;transform:translateX(-50%);white-space:nowrap;font:700 12px system-ui,sans-serif;color:#fff;background:rgba(10,14,16,.9);padding:1px 6px;border-radius:5px;border:1px solid #fff}
 .sec{padding:10px 6px 2px;color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase;border-top:1px solid var(--line)}
@@ -113,7 +168,7 @@ input[type=text],input[type=number],select{width:100%;min-height:46px;border-rad
   <button class="primary" id="btnDraw">Draw pipe</button>
   <button id="btnLandmark">Landmark</button>
   <button id="btnMeasure">Measure</button>
-  <button id="btnList">Pipes (<span id="cnt">0</span>)</button>
+  <button id="btnList">Menu (<span id="cnt">0</span>)</button>
 </div>
 <div class="bar" id="barAdj" style="display:none">
   <button id="btnAUndo">Undo move</button>
@@ -138,34 +193,72 @@ input[type=text],input[type=number],select{width:100%;min-height:46px;border-rad
 </div>
 
 <div class="sheet" id="sheet">
-  <header><h2>Pipes &amp; nodes</h2><button class="x" id="btnCloseSheet" aria-label="Close">&times;</button></header>
-  <div class="totals" id="totals"></div>
-  <div class="setrow">
-    <label for="fPrefix">Node names</label>
-    <input type="text" id="fPrefix" maxlength="6" placeholder="prefix, e.g. A (blank = 1,2,3)" autocomplete="off">
+  <header><div><h2>Menu</h2><div class="sub" id="projSub"></div></div><button class="x" id="btnCloseSheet" aria-label="Close">&times;</button></header>
+  <div class="tabs" id="sheetTabs">
+    <button data-tab="p" class="on">Pipes</button><button data-tab="l">Landmarks</button><button data-tab="e">Export</button><button data-tab="s">Settings</button>
   </div>
-  <div class="setrow">
-    <label for="fOrder">Order</label>
-    <select id="fOrder" style="flex:1;min-height:40px"><option value="flow">From start node (flow order)</option><option value="created">Creation order</option><option value="we">West to east</option><option value="ns">North to south</option></select>
-    <button id="btnRenum">Renumber</button>
+
+  <div class="pane on" id="pane-p">
+    <div class="totals" id="totals"></div>
+    <div class="setrow"><label for="fFilter">Show</label>
+      <select id="fFilter" style="flex:1;min-height:40px"><option value="all">All pipes</option><option value="dist">Distribution</option><option value="pump">Pumping mains</option><option value="existing">Existing</option><option value="required">Required</option></select>
+    </div>
+    <div class="list" id="list"></div>
   </div>
-  <div class="list" id="list"></div>
-  <div class="exp">
-    <button class="primary full" id="btnPrintMap">Printable drawing (PDF)</button>
-    <button class="full" id="btnClean">Clean up: merge close nodes + split pipes at nodes</button>
-    <button class="full" id="btnKml">Download KML for Google Earth</button>
-    <button id="btnCsv">Download CSV</button>
-    <button id="btnJson">Backup (JSON)</button>
-    <button id="btnImport">Restore backup</button>
-    <button id="btnClear" style="color:#ff8a8a">Delete all</button>
+
+  <div class="pane" id="pane-l"><div class="list" id="lmList"></div></div>
+
+  <div class="pane" id="pane-e">
+    <div class="exp1">
+      <button class="primary" id="btnPrintMap">Printable drawing (PDF)<small>Plain map with labels, nodes, legend and summary</small></button>
+      <button id="btnKml">KML for Google Earth<small>Pipes, nodes and landmarks with colours</small></button>
+      <button id="btnCsv">CSV for the hydraulic statement<small>From node, to node, type, material, size, length, depth</small></button>
+      <button id="btnJson">Backup (JSON)<small>Save a copy of this project</small></button>
+      <button id="btnImport">Restore backup<small>Replace this project with a backup file</small></button>
+    </div>
+    <input type="file" id="fileIn" accept=".json,application/json" style="display:none">
   </div>
-  <input type="file" id="fileIn" accept=".json,application/json" style="display:none">
+
+  <div class="pane" id="pane-s">
+    <div class="grp"><div class="gt">Account</div>
+      <div class="note" id="acctName" style="margin:0 0 8px"></div>
+      <button class="wide" id="btnSignOut">Sign out</button>
+    </div>
+    <div class="grp"><div class="gt">Project</div>
+      <div class="setrow"><select id="fProj" aria-label="Project" style="flex:1;min-height:40px"></select></div>
+      <div class="setrow"><button id="btnProjNew">New</button><button id="btnProjRen">Rename</button><button id="btnProjDel">Delete</button></div>
+    </div>
+    <div class="grp"><div class="gt">Units</div>
+      <div class="setrow"><label for="fUnitDia">Diameters in</label>
+        <select id="fUnitDia" style="flex:1;min-height:40px"><option value="mm">Millimetres (63 mm)</option><option value="inch">Inches (2")</option></select></div>
+    </div>
+    <div class="grp"><div class="gt">Node numbering</div>
+      <div class="setrow"><label for="fPrefix">Prefix</label><input type="text" id="fPrefix" maxlength="6" placeholder="e.g. A (blank = 1, 2, 3)" autocomplete="off"></div>
+      <div class="setrow"><label for="fOrder">Order</label>
+        <select id="fOrder" style="flex:1;min-height:40px"><option value="flow">From start node (flow order)</option><option value="created">Creation order</option><option value="we">West to east</option><option value="ns">North to south</option></select></div>
+      <button class="wide" id="btnRenum">Renumber all nodes</button>
+      <p class="note">For flow order, tap your source node on the map and choose "Number from here" first.</p>
+    </div>
+    <div class="grp"><div class="gt">Network tools</div>
+      <button class="wide" id="btnClean">Clean up network</button>
+      <p class="note">Merges nodes closer than 2.5 m, adds nodes where pipes cross or meet, and splits pipes at every node. Take a backup first.</p>
+    </div>
+    <div class="grp"><div class="gt">Danger zone</div>
+      <button class="wide danger" id="btnClear">Delete everything in this project</button>
+    </div>
+  </div>
 </div>
 
 <div class="modalwrap" id="modalWrap">
   <div class="modal" role="dialog" aria-labelledby="mTitle">
     <h2 id="mTitle">New pipe</h2>
     <div class="len" id="mLen"></div>
+
+    <label>Line type</label>
+    <div class="seg c2">
+      <div><input type="radio" name="kind" id="kD" value="dist"><label for="kD">Distribution</label></div>
+      <div><input type="radio" name="kind" id="kP" value="pump"><label for="kP">Pumping main</label></div>
+    </div>
 
     <label>Pipe status</label>
     <div class="seg c2">
@@ -176,14 +269,12 @@ input[type=text],input[type=number],select{width:100%;min-height:46px;border-rad
     <label>Colour (default follows status)</label>
     <div class="seg c5" id="cols"></div>
 
+    <label for="fMat">Pipe material</label>
+    <select id="fMat"><option value="">Select material</option></select>
+
     <label for="fDia">Diameter</label>
-    <select id="fDia">
-      <option value="">Select diameter</option>
-      <option value="2">2 inch</option>
-      <option value="2.5">2.5 inch</option>
-      <option value="3">3 inch</option>
-      <option value="5">5 inch</option>
-    </select>
+    <select id="fDia"><option value="">Choose material first</option></select>
+    <input type="number" id="fDiaOther" inputmode="numeric" min="10" step="1" placeholder="Diameter in mm" style="display:none;margin-top:8px">
 
     <label for="fDepth">Depth underground</label>
     <div class="depthrow"><input type="number" id="fDepth" inputmode="decimal" step="0.1" min="0"><select id="fUnit" aria-label="Depth unit"><option>ft</option><option>m</option></select></div>
@@ -219,26 +310,71 @@ input[type=text],input[type=number],select{width:100%;min-height:46px;border-rad
 </div>
 
 <div id="printView">
-  <div class="ptools">
-    <input type="text" id="pTitle" aria-label="Header title" placeholder="Title, e.g. Village name water supply scheme">
-    <input type="text" id="pSub" aria-label="Header second line" placeholder="Second line, e.g. Habitation, GP, Mandal, District">
-    <input type="text" id="pBy" aria-label="Prepared by" placeholder="Prepared by (name / designation)">
-    <select id="pArea" aria-label="Area to print"><option value="all">Area: whole map</option><option value="view">Area: map view / dragged box</option></select>
-    <button id="pPick">Drag a box on the map</button>
-    <select id="pLm" aria-label="Landmarks on print"><option value="on">Landmarks: shown</option><option value="off">Landmarks: hidden</option></select>
-    <select id="pLmSize" aria-label="Landmark size on print"><option value="1">Landmark size: as set</option><option value="0.35">Landmark size: tiny</option><option value="0.5">Landmark size: extra small</option><option value="0.7">Landmark size: smaller</option><option value="1.4">Landmark size: larger</option><option value="1.9">Landmark size: much larger</option></select>
-    <select id="pArrow" aria-label="Direction arrows"><option value="on">Arrows: on</option><option value="off">Arrows: off</option></select>
-    <select id="pNodes" aria-label="Nodes on print"><option value="names">Nodes: circles + names</option><option value="circles">Nodes: circles only</option><option value="none">Nodes: hidden</option></select>
-    <select id="pLbl" aria-label="Pipe labels on print"><option value="both">Labels: dia | length</option><option value="len">Labels: length only</option><option value="none">Labels: none</option></select>
-    <select id="pDot" aria-label="Node dot size"><option value="0.8">Dots: small</option><option value="0.5">Dots: tiny</option><option value="1.3">Dots: large</option></select>
-    <select id="pLine" aria-label="Line thickness"><option value="1">Lines: normal</option><option value="0.65">Lines: thin</option><option value="0.4">Lines: extra thin</option><option value="1.4">Lines: thick</option></select>
-    <select id="pFont" aria-label="Text size"><option value="1">Text: normal</option><option value="0.8">Text: small</option><option value="0.6">Text: extra small</option><option value="1.3">Text: large</option></select>
-    <select id="pPaper" aria-label="Paper size"><option value="A4">A4</option><option value="A3">A3</option></select>
-    <select id="pOrient" aria-label="Orientation"><option value="auto">Auto</option><option value="landscape">Landscape</option><option value="portrait">Portrait</option></select>
-    <button id="pClose">Close</button>
-    <button class="primary" id="pPrint">Print / Save as PDF</button>
+  <div class="pbar">
+    <button id="pClose" class="pb">&larr; Back</button>
+    <div class="pt">Print preview</div>
+    <button id="pPrint" class="pb primary">Print / PDF</button>
   </div>
-  <div class="pstage" id="pStage"></div>
+  <div class="pinfo" id="pInfo"></div>
+  <div class="pwrap">
+    <div class="pstage" id="pStage"></div>
+    <div class="pzoom"><button id="pZoomIn" aria-label="Zoom in">+</button><button id="pZoomFit" aria-label="Fit to screen">Fit</button><button id="pZoomOut" aria-label="Zoom out">&minus;</button></div>
+  </div>
+  <div class="pdrawer">
+    <button class="pgrip" id="pGrip" aria-expanded="false"><span>Options: header, page, style, labels</span><span id="pArrowIc">&#9650;</span></button>
+    <div class="pbody" id="pBody" style="display:none">
+      <div class="presets" id="pPresets"></div>
+      <div class="ptabs" id="pTabs">
+        <button data-pt="hdr" class="on">Header</button><button data-pt="page">Page</button><button data-pt="style">Style</button><button data-pt="lbl">Labels</button>
+      </div>
+      <div class="ppane on" data-pp="hdr">
+        <label for="pTitle">Title</label><input type="text" id="pTitle" placeholder="e.g. Village name water supply scheme" autocomplete="off">
+        <label for="pSub">Second line</label><input type="text" id="pSub" placeholder="Habitation, GP, Mandal, District" autocomplete="off">
+        <label for="pBy">Prepared by</label><input type="text" id="pBy" placeholder="Name / designation" autocomplete="off">
+      </div>
+      <div class="ppane" data-pp="page">
+        <div class="pgrid">
+          <div><label for="pPaper">Paper</label><select id="pPaper"><option value="A4">A4</option><option value="A3">A3</option></select></div>
+          <div><label for="pOrient">Orientation</label><select id="pOrient"><option value="auto">Auto</option><option value="landscape">Landscape</option><option value="portrait">Portrait</option></select></div>
+          <div class="pwide"><label for="pArea">Area</label><select id="pArea"><option value="all">Whole map</option><option value="view">Map view / dragged box</option></select></div>
+        </div>
+        <button class="ppick" id="pPick">Drag a box on the map to choose the area</button>
+      </div>
+      <div class="ppane" data-pp="style">
+        <div class="pgrid">
+          <div><label for="pLine">Lines</label><select id="pLine"><option value="1">Normal</option><option value="0.65">Thin</option><option value="0.4">Extra thin</option><option value="1.4">Thick</option></select></div>
+          <div><label for="pDot">Node dots</label><select id="pDot"><option value="0.8">Small</option><option value="0.5">Tiny</option><option value="1.3">Large</option></select></div>
+          <div><label for="pFont">Text size</label><select id="pFont"><option value="1">Normal</option><option value="0.8">Small</option><option value="0.6">Extra small</option><option value="1.3">Large</option></select></div>
+          <div><label for="pArrow">Flow arrows</label><select id="pArrow"><option value="on">On</option><option value="off">Off</option></select></div>
+        </div>
+      </div>
+      <div class="ppane" data-pp="lbl">
+        <div class="pgrid">
+          <div><label for="pNodes">Nodes</label><select id="pNodes"><option value="names">Dots + names</option><option value="circles">Dots only</option><option value="none">Hidden</option></select></div>
+          <div><label for="pLbl">Pipe labels</label><select id="pLbl"><option value="both">Size | length</option><option value="len">Length only</option><option value="none">None</option></select></div>
+          <div><label for="pLm">Landmarks</label><select id="pLm"><option value="on">Shown</option><option value="off">Hidden</option></select></div>
+          <div><label for="pLmSize">Landmark size</label><select id="pLmSize"><option value="1">As set</option><option value="0.35">Tiny</option><option value="0.5">Extra small</option><option value="0.7">Smaller</option><option value="1.4">Larger</option><option value="1.9">Much larger</option></select></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="loginView" role="dialog" aria-labelledby="loginH">
+  <div class="lcard">
+    <svg class="llogo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#182127"/><path d="M12 46 L26 34 L38 40 L52 18" fill="none" stroke="#2979ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 34 L30 16" fill="none" stroke="#ff1744" stroke-width="4" stroke-linecap="round" stroke-dasharray="6 5"/><circle cx="12" cy="46" r="4.5" fill="#fff"/><circle cx="26" cy="34" r="4.5" fill="#fff"/><circle cx="38" cy="40" r="4.5" fill="#fff"/><circle cx="52" cy="18" r="4.5" fill="#3ddc97"/></svg>
+    <h1 id="loginH">Village Pipeline Mapper</h1>
+    <p class="lsub">Sign in to continue</p>
+    <form id="lForm" autocomplete="on">
+      <label for="lUser">Username</label>
+      <input type="text" id="lUser" name="username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
+      <label for="lPass">Password</label>
+      <div class="lpw"><input type="password" id="lPass" name="password" autocomplete="current-password"><button type="button" id="lShow" aria-label="Show password">Show</button></div>
+      <div class="lmsg" id="lMsg" role="alert"></div>
+      <button type="submit" class="lbtn" id="lBtn">Sign in</button>
+    </form>
+    <p class="lfoot">After the first sign-in the app keeps working offline on this phone.</p>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -258,9 +394,21 @@ var PAL={
 };
 var STATUS={existing:{label:"Existing",key:"blue"},required:{label:"Required",key:"red"}};
 var EXTRA=["green","yellow","orange","purple"];
-var DIAS=["2","2.5","3","5"];
-var PWID={"2":0.7,"2.5":0.9,"3":1.1,"5":1.5};
-var KEY2="pipeline-mapper-v2",KEY1="pipeline-mapper-v1",HKEY="pipeline-mapper-header";
+var KINDS={dist:{label:"Distribution"},pump:{label:"Pumping main"}};
+var MATS={
+  upvc:{label:"uPVC",sizes:[[20,"0.5"],[25,"0.75"],[32,"1"],[40,"1.25"],[50,"1.5"],[63,"2"],[75,"2.5"],[90,"3"],[110,"4"],[125,"4.5"],[140,"5"],[160,"6"],[180,"7"],[200,"8"],[225,"9"],[250,"10"],[280,"11"],[315,"12"]]},
+  hdpe:{label:"HDPE",sizes:[[20,"0.5"],[25,"0.75"],[32,"1"],[40,"1.25"],[50,"1.5"],[63,"2"],[75,"2.5"],[90,"3"],[110,"4"],[125,"4.5"],[140,"5"],[160,"6"],[180,"7"],[200,"8"],[225,"9"],[250,"10"],[280,"11"],[315,"12"],[355,"14"],[400,"16"],[450,"18"],[500,"20"],[560,"22"],[630,"24"]]},
+  di:{label:"DI",sizes:[[80,"3"],[100,"4"],[150,"6"],[200,"8"],[250,"10"],[300,"12"],[350,"14"],[400,"16"],[450,"18"],[500,"20"],[600,"24"],[700,"28"],[800,"32"],[900,"36"],[1000,"40"]]},
+  gi:{label:"GI",sizes:[[15,"0.5"],[20,"0.75"],[25,"1"],[32,"1.25"],[40,"1.5"],[50,"2"],[65,"2.5"],[80,"3"],[100,"4"],[125,"5"],[150,"6"]]},
+  ci:{label:"CI",sizes:[[80,"3"],[100,"4"],[150,"6"],[200,"8"],[250,"10"],[300,"12"],[350,"14"],[400,"16"],[450,"18"],[500,"20"],[600,"24"]]},
+  ac:{label:"AC",sizes:[[80,"3"],[100,"4"],[150,"6"],[200,"8"],[250,"10"],[300,"12"],[350,"14"],[400,"16"],[450,"18"],[500,"20"],[600,"24"]]},
+  ms:{label:"MS",sizes:[[100,"4"],[150,"6"],[200,"8"],[250,"10"],[300,"12"],[350,"14"],[400,"16"],[450,"18"],[500,"20"],[600,"24"],[700,"28"],[800,"32"],[900,"36"],[1000,"40"],[1200,"48"]]},
+  grp:{label:"GRP",sizes:[[300,"12"],[350,"14"],[400,"16"],[450,"18"],[500,"20"],[600,"24"],[700,"28"],[800,"32"],[900,"36"],[1000,"40"]]},
+  other:{label:"Other",sizes:[[25,"1"],[32,"1.25"],[40,"1.5"],[50,"2"],[63,"2"],[65,"2.5"],[75,"2.5"],[80,"3"],[90,"3"],[100,"4"],[110,"4"],[125,"5"],[140,"5"],[150,"6"],[160,"6"],[200,"8"],[250,"10"],[300,"12"],[315,"12"],[400,"16"],[500,"20"],[600,"24"]]}
+};
+var MAT_ORDER=["upvc","hdpe","di","gi","ci","ac","ms","grp","other"];
+var LEGACY_MM={"2":63,"2.5":75,"3":90,"5":140};
+var KEY2="pipeline-mapper-v2",KEY1="pipeline-mapper-v1",HKEY="pipeline-mapper-header",KEYP="pipeline-mapper-projects",KEYD="pipeline-mapper-p-",KEYS="pipeline-mapper-settings";
 var SNAP_PX=24,NODE_TOL=2.5;
 var TYPES={
   ohsr:{label:"OHSR",full:"Overhead Service Reservoir",shape:"square",color:"#00897b",ch:"O"},
@@ -300,13 +448,28 @@ function midPoint(c){
   }
   return c[c.length-1];
 }
-function labelText(p){return p.dia+"\" | "+Math.round(p.length)+" m"}
+function inchLabel(mat,mm){
+  var m=MATS[mat]||MATS.other,i;
+  for(i=0;i<m.sizes.length;i++)if(m.sizes[i][0]===mm)return m.sizes[i][1];
+  for(i=0;i<MATS.other.sizes.length;i++)if(MATS.other.sizes[i][0]===mm)return MATS.other.sizes[i][1];
+  return String(Math.round(mm/25.4*2)/2);
+}
+function diaText(p){return settings.diaUnit==="mm"?p.dia+" mm":inchLabel(p.mat,p.dia)+"\""}
+function matLabel(p){return p.mat&&MATS[p.mat]?MATS[p.mat].label:""}
+function labelText(p){return diaText(p)+" | "+Math.round(p.length)+" m"}
+function pw(p){return Math.min(2.6,Math.max(0.6,0.35+0.0082*p.dia))*(p.kind==="pump"?1.3:1)}
+function descPipe(p){return (KINDS[p.kind]||KINDS.dist).label+" | "+STATUS[p.status].label+" | "+(matLabel(p)?matLabel(p)+" ":"")+labelText(p)}
 function colorKey(p){return p.color&&PAL[p.color]?p.color:STATUS[p.status||"existing"].key}
 
 /* ---------- state ---------- */
-var pipes=[],nodes=[],landmarks=[],prefix="",nextNo=1,sourceId="",createdIds=[];
+var pipes=[],nodes=[],landmarks=[],prefix="",nextNo=1,sourceId="",createdIds=[],hdrData={};
+var settings={diaUnit:"mm",presets:[]},projects={current:"",list:[]};
+function newProjId(){return "j"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
+function idxSave(){try{localStorage.setItem(KEYP,JSON.stringify(projects))}catch(e){}}
+function saveSettings(){try{localStorage.setItem(KEYS,JSON.stringify(settings))}catch(e){}}
+function projName(){for(var i=0;i<projects.list.length;i++)if(projects.list[i].id===projects.current)return projects.list[i].name;return "project"}
 function save(){
-  try{localStorage.setItem(KEY2,JSON.stringify({v:2,pipes:pipes,nodes:nodes,landmarks:landmarks,prefix:prefix,next:nextNo,source:sourceId}))}
+  try{localStorage.setItem(KEYD+projects.current,JSON.stringify({v:3,pipes:pipes,nodes:nodes,landmarks:landmarks,prefix:prefix,next:nextNo,source:sourceId,hdr:hdrData}))}
   catch(e){toast("Could not save in this browser. Download a backup.")}
 }
 function nameTaken(n){var l=String(n).toLowerCase();return nodes.some(function(x){return String(x.name).toLowerCase()===l})}
@@ -322,10 +485,13 @@ function pruneNodes(){
   var used={};pipes.forEach(function(p){used[p.n1]=1;used[p.n2]=1});
   nodes=nodes.filter(function(n){return used[n.id]});
 }
-function normalizePipe(p){
+function normalizePipe(p,legacy){
   if(!p||!Array.isArray(p.coords)||p.coords.length<2||!p.dia)return null;
+  var dia=legacy?(LEGACY_MM[String(p.dia)]||Math.round(parseFloat(p.dia)*25.4)):Number(p.dia);
+  if(!dia||!isFinite(dia))return null;
   var q={id:p.id||("p"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)),
-    status:STATUS[p.status]?p.status:"existing",color:PAL[p.color]?p.color:"",dia:String(p.dia),
+    kind:KINDS[p.kind]?p.kind:"dist",mat:MATS[p.mat]?p.mat:"",
+    status:STATUS[p.status]?p.status:"existing",color:PAL[p.color]?p.color:"",dia:dia,
     depth:p.depth==null?"":p.depth,unit:p.unit||"ft",coords:p.coords,length:lineLen(p.coords),
     ts:p.ts||new Date().toISOString(),n1:p.n1,n2:p.n2};
   if(!q.n1||!nodeById(q.n1))q.n1=ensureNode(q.coords[0]);
@@ -407,7 +573,7 @@ function splitAllAtNodes(only){
     if(pcs.length===1){out.push(p);return}
     cnt++;
     pcs.forEach(function(pc,i){
-      out.push({id:p.id+"s"+i,status:p.status,color:p.color,dia:p.dia,depth:p.depth,unit:p.unit,coords:pc.coords,length:lineLen(pc.coords),ts:p.ts,n1:pc.n1,n2:pc.n2});
+      out.push({id:p.id+"s"+i,kind:p.kind,mat:p.mat,status:p.status,color:p.color,dia:p.dia,depth:p.depth,unit:p.unit,coords:pc.coords,length:lineLen(pc.coords),ts:p.ts,n1:pc.n1,n2:pc.n2});
     });
   });
   pipes=out;
@@ -415,6 +581,8 @@ function splitAllAtNodes(only){
 }
 function newPipeId(){return "p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 function setState(obj){
+  var legacy=Array.isArray(obj)||!obj||!obj.v||obj.v<3;
+  hdrData=(!Array.isArray(obj)&&obj&&obj.hdr)||{};
   var list=Array.isArray(obj)?obj:(obj&&obj.pipes)||[];
   nodes=(!Array.isArray(obj)&&obj&&Array.isArray(obj.nodes))?obj.nodes.filter(function(n){return n&&n.id&&isFinite(n.lat)&&isFinite(n.lng)}):[];
   prefix=(!Array.isArray(obj)&&obj&&obj.prefix)||"";
@@ -423,18 +591,36 @@ function setState(obj){
   sourceId=(!Array.isArray(obj)&&obj&&obj.source)||"";
   landmarks=(!Array.isArray(obj)&&obj&&Array.isArray(obj.landmarks))?obj.landmarks.filter(function(l){return l&&l.id&&TYPES[l.type]&&isFinite(l.lat)&&isFinite(l.lng)}):[];
   pipes=[];
-  list.forEach(function(p){var q=normalizePipe(p);if(q)pipes.push(q)});
+  list.forEach(function(p){var q=normalizePipe(p,legacy);if(q)pipes.push(q)});
   pruneNodes();
   if(!nodeById(sourceId))sourceId="";
 }
-function loadState(){
+function loadSettings(){try{var o=JSON.parse(localStorage.getItem(KEYS)||"null");if(o&&(o.diaUnit==="mm"||o.diaUnit==="inch"))settings.diaUnit=o.diaUnit;if(o&&Array.isArray(o.presets))settings.presets=o.presets}catch(e){}}
+function loadProject(id){
+  var o=null;try{o=JSON.parse(localStorage.getItem(KEYD+id)||"null")}catch(e){}
+  setState(o);
+}
+function loadAll(){
+  loadSettings();
+  var idx=null;try{idx=JSON.parse(localStorage.getItem(KEYP)||"null")}catch(e){}
+  if(idx&&Array.isArray(idx.list)&&idx.list.length){
+    projects=idx;
+    if(!projects.list.some(function(p){return p.id===projects.current}))projects.current=projects.list[0].id;
+    loadProject(projects.current);return;
+  }
+  /* first run of this version: bring over data saved by older versions */
   var raw=null;
   try{raw=JSON.parse(localStorage.getItem(KEY2)||"null")}catch(e){}
-  if(raw&&raw.pipes){setState(raw);return}
-  var old=null;try{old=JSON.parse(localStorage.getItem(KEY1)||"null")}catch(e){}
-  if(Array.isArray(old)){setState(old);save()}
+  if(!(raw&&raw.pipes)){var old=null;try{old=JSON.parse(localStorage.getItem(KEY1)||"null")}catch(e){}if(Array.isArray(old))raw=old}
+  var id=newProjId();
+  projects={current:id,list:[{id:id,name:raw?"My project":"Project 1"}]};
+  if(raw){
+    var hdr={};try{hdr=JSON.parse(localStorage.getItem(HKEY)||"{}")||{}}catch(e){}
+    setState(raw);hdrData=hdr;
+    settings.diaUnit="inch";saveSettings();
+  }else setState(null);
+  save();idxSave();
 }
-
 /* ---------- map ---------- */
 var map=L.map("map",{zoomControl:false,maxZoom:21}).setView([16.5062,80.648],15);
 var gHybrid=L.tileLayer("https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",{subdomains:"0123",maxZoom:21,maxNativeZoom:20,attribution:"Map data &copy; Google"}).addTo(map);
@@ -467,7 +653,7 @@ var nodeLayer=L.layerGroup().addTo(map);
 var lmLayer=L.layerGroup().addTo(map);
 var drawing=false;
 
-loadState();
+loadAll();
 
 /* ---------- node helpers on map ---------- */
 function nearestNode(ll,px){
@@ -577,8 +763,9 @@ $("lmSave").onclick=function(){
 /* ---------- render saved pipes ---------- */
 function drawPipe(p){
   var color=PAL[colorKey(p)].s;
-  var casing=L.polyline(p.coords,{color:"#000",weight:8,opacity:.55,interactive:false});
-  var line=L.polyline(p.coords,{color:color,weight:5,opacity:1});
+  var pump=p.kind==="pump",dash=pump?"14 9":null;
+  var casing=L.polyline(p.coords,{color:"#000",weight:pump?11:8,opacity:.55,interactive:false,dashArray:dash});
+  var line=L.polyline(p.coords,{color:color,weight:pump?7:5,opacity:1,dashArray:dash});
   var lab=L.marker(midPoint(p.coords),{interactive:false,keyboard:false,icon:labIcon(p,color)});
   line.on("click",function(e){
     if(drawing||selecting||measuring||placing||adjusting)return;
@@ -600,7 +787,7 @@ function updatePipeGeometry(p){
   L2.lab.setLatLng(midPoint(p.coords));L2.lab.setIcon(labIcon(p,PAL[colorKey(p)].s));
 }
 function popupHtml(p){
-  return "<b>"+esc(nodeName(p.n1))+" &rarr; "+esc(nodeName(p.n2))+"</b><br>"+esc(STATUS[p.status].label)+" | "+esc(labelText(p))+"<br>Depth: "+esc(p.depth===""?"-":p.depth+" "+p.unit)+
+  return "<b>"+esc(nodeName(p.n1))+" &rarr; "+esc(nodeName(p.n2))+"</b><br>"+esc(descPipe(p))+"<br>Depth: "+esc(p.depth===""?"-":p.depth+" "+p.unit)+
     "<br><button data-act='edit' data-id='"+esc(p.id)+"'>Edit</button><button data-act='del' data-id='"+esc(p.id)+"'>Delete</button>";
 }
 map.on("popupopen",function(e){
@@ -849,6 +1036,27 @@ var editingId=null;
   });
   $("cols").innerHTML=h;
 })();
+function curKind(){var r=document.querySelector("input[name=kind]:checked");return r?r.value:""}
+function diaOptionText(mat,sz){return settings.diaUnit==="mm"?(sz[0]+" mm ("+sz[1]+"\")"):(sz[1]+"\" ("+sz[0]+" mm)")}
+function fillDia(mat,sel){
+  var d=$("fDia");
+  if(!mat){d.innerHTML='<option value="">Choose material first</option>';$("fDiaOther").style.display="none";return}
+  var m=MATS[mat]||MATS.other,h='<option value="">Select diameter</option>',found=false;
+  m.sizes.forEach(function(z){if(String(z[0])===String(sel))found=true;h+='<option value="'+z[0]+'">'+diaOptionText(mat,z)+'</option>'});
+  h+='<option value="other">Other size (type mm)...</option>';
+  d.innerHTML=h;
+  if(sel&&found)d.value=String(sel);
+  else if(sel){d.value="other";$("fDiaOther").value=sel}
+  else d.value="";
+  $("fDiaOther").style.display=d.value==="other"?"block":"none";
+}
+(function buildMats(){
+  var h='<option value="">Select material</option>';
+  MAT_ORDER.forEach(function(k){h+='<option value="'+k+'">'+MATS[k].label+(k==="other"?" / not listed":"")+'</option>'});
+  $("fMat").innerHTML=h;
+})();
+$("fMat").onchange=function(){fillDia($("fMat").value,"")};
+$("fDia").onchange=function(){$("fDiaOther").style.display=$("fDia").value==="other"?"block":"none"};
 function curStatus(){var r=document.querySelector("input[name=stat]:checked");return r?r.value:""}
 function syncDefSw(){var s=curStatus();$("defSw").style.background=s?PAL[STATUS[s].key].s:"#888"}
 $("modalWrap").addEventListener("change",function(e){if(e.target.name==="stat")syncDefSw()});
@@ -869,7 +1077,12 @@ function openForm(id){
   $("sEx").checked=!!p&&p.status==="existing";
   $("sRq").checked=!!p&&p.status==="required";
   var ck=$("c_"+(p&&p.color?p.color:"def"));if(ck)ck.checked=true;
-  $("fDia").value=p?p.dia:"";
+  var lastP=pipes.length?pipes[pipes.length-1]:null;
+  var kv=p?p.kind:(lastP?lastP.kind:"dist");
+  $("kD").checked=kv!=="pump";$("kP").checked=kv==="pump";
+  var mv=p?(p.mat||"other"):(lastP&&lastP.mat?lastP.mat:"");
+  $("fMat").value=mv;
+  fillDia(mv,p?p.dia:"");
   $("fDepth").value=p?p.depth:"";
   $("fUnit").value=p?p.unit:(pipes.length?pipes[pipes.length-1].unit:"ft");
   syncDefSw();
@@ -880,12 +1093,14 @@ $("mCancel").onclick=closeForm;
 $("mSave").onclick=function(){
   var st=curStatus();
   if(!st){toast("Pick Existing or Required");return}
-  var dia=$("fDia").value;
-  if(!dia){toast("Select a diameter");return}
+  var kind=curKind()||"dist",mat=$("fMat").value;
+  if(!mat){toast("Select the pipe material");return}
+  var dv=$("fDia").value,dia=dv==="other"?parseFloat($("fDiaOther").value):parseFloat(dv);
+  if(!dia||dia<=0){toast(dv==="other"?"Type the diameter in mm":"Select a diameter");return}
   var ce=document.querySelector("input[name=col]:checked"),col=ce?ce.value:"";
   var old=editingId?pipes.find(function(x){return x.id===editingId}):null;
   if(old){
-    var rec={id:old.id,status:st,color:col,dia:dia,depth:$("fDepth").value,unit:$("fUnit").value,coords:old.coords,length:lineLen(old.coords),ts:old.ts,n1:old.n1,n2:old.n2};
+    var rec={id:old.id,kind:kind,mat:mat,status:st,color:col,dia:dia,depth:$("fDepth").value,unit:$("fUnit").value,coords:old.coords,length:lineLen(old.coords),ts:old.ts,n1:old.n1,n2:old.n2};
     pipes=pipes.map(function(x){return x.id===old.id?rec:x});
     save();closeForm();refreshAll();
     toast("Saved "+nodeName(rec.n1)+" to "+nodeName(rec.n2)+": "+labelText(rec));
@@ -899,7 +1114,7 @@ $("mSave").onclick=function(){
   createdIds.forEach(function(id){touch[id]=1});
   var pieces=splitCoords(coords,startId,endId),ts=new Date().toISOString(),made=[];
   pieces.forEach(function(pc){
-    var rec={id:newPipeId(),status:st,color:col,dia:dia,depth:$("fDepth").value,unit:$("fUnit").value,coords:pc.coords,length:lineLen(pc.coords),ts:ts,n1:pc.n1,n2:pc.n2};
+    var rec={id:newPipeId(),kind:kind,mat:mat,status:st,color:col,dia:dia,depth:$("fDepth").value,unit:$("fUnit").value,coords:pc.coords,length:lineLen(pc.coords),ts:ts,n1:pc.n1,n2:pc.n2};
     pipes.push(rec);made.push(rec);
   });
   var splitOld=splitAllAtNodes(touch);
@@ -910,25 +1125,84 @@ $("mSave").onclick=function(){
 };
 
 /* ---------- list ---------- */
+function renderProjects(){
+  var sel=$("fProj");
+  sel.innerHTML=projects.list.map(function(p){return '<option value="'+esc(p.id)+'">'+esc(p.name)+'</option>'}).join("");
+  sel.value=projects.current;
+  $("fUnitDia").value=settings.diaUnit;
+  $("projSub").textContent=projName();
+}
+function fitPipes(){
+  if(!pipes.length)return;
+  var bb=L.latLngBounds([]);pipes.forEach(function(p){p.coords.forEach(function(c){bb.extend(c)})});
+  map.fitBounds(bb,{padding:[40,40],maxZoom:18});
+}
+function switchProject(id){
+  save();projects.current=id;idxSave();loadProject(id);refreshAll();fitPipes();
+  toast("Opened project: "+projName());
+}
+$("fProj").onchange=function(){switchProject($("fProj").value)};
+$("btnProjNew").onclick=function(){
+  var name=prompt("Name of the new project (for example the village name):","");
+  if(name===null)return;
+  name=name.trim()||("Project "+(projects.list.length+1));
+  save();
+  var id=newProjId();projects.list.push({id:id,name:name});projects.current=id;idxSave();
+  setState(null);save();refreshAll();toast("New project: "+name);
+};
+$("btnProjRen").onclick=function(){
+  var name=prompt("New name for this project:",projName());
+  if(name===null||!name.trim())return;
+  projects.list.forEach(function(p){if(p.id===projects.current)p.name=name.trim()});
+  idxSave();renderProjects();toast("Renamed");
+};
+$("btnProjDel").onclick=function(){
+  if(!confirm("Delete project \""+projName()+"\" and all its pipes, nodes and landmarks from this device? Download a backup first."))return;
+  var gone=projects.current;
+  try{localStorage.removeItem(KEYD+gone)}catch(e){}
+  projects.list=projects.list.filter(function(p){return p.id!==gone});
+  if(!projects.list.length){var id=newProjId();projects.list.push({id:id,name:"Project 1"});projects.current=id;setState(null);save()}
+  else{projects.current=projects.list[0].id;loadProject(projects.current)}
+  idxSave();refreshAll();fitPipes();toast("Project deleted");
+};
+$("fUnitDia").onchange=function(){settings.diaUnit=$("fUnitDia").value;saveSettings();refreshAll()};
 function renderList(){
-  var te=0,tr=0;
-  pipes.forEach(function(p){if(p.status==="required")tr+=p.length;else te+=p.length});
-  $("totals").innerHTML="<span style='border-color:var(--blue)'>Existing: "+Math.round(te)+" m</span><span style='border-color:var(--red)'>Required: "+Math.round(tr)+" m</span><span>Nodes: "+nodes.length+"</span>"+(landmarks.length?"<span>Landmarks: "+landmarks.length+"</span>":"");
+  renderProjects();
+  var te=0,tr=0,tp=0;
+  pipes.forEach(function(p){if(p.status==="required")tr+=p.length;else te+=p.length;if(p.kind==="pump")tp+=p.length});
+  $("totals").innerHTML="<span style='border-color:var(--blue)'>Existing "+Math.round(te)+" m</span><span style='border-color:var(--red)'>Required "+Math.round(tr)+" m</span>"+(tp?"<span>Pumping "+Math.round(tp)+" m</span>":"")+"<span>Nodes "+nodes.length+"</span>";
+  document.querySelector("#sheetTabs [data-tab=p]").textContent="Pipes ("+pipes.length+")";
+  document.querySelector("#sheetTabs [data-tab=l]").textContent="Landmarks ("+landmarks.length+")";
+  var f=$("fFilter").value;
+  var shown=pipes.filter(function(p){return f==="all"||(f==="dist"&&p.kind!=="pump")||(f==="pump"&&p.kind==="pump")||f===p.status});
   var l=$("list");
-  if(!pipes.length&&!landmarks.length){l.innerHTML="<div class='empty'>No pipes yet. Tap Draw pipe, trace the route, then fill in the details.</div>";return}
-  var h=pipes.slice().reverse().map(function(p){
-    return "<div class='row'><div class='sw' style='background:"+PAL[colorKey(p)].s+"'></div><div class='main'><div class='t'>"+esc(nodeName(p.n1))+" &rarr; "+esc(nodeName(p.n2))+"</div><div class='s'>"+esc(STATUS[p.status].label)+" | "+esc(labelText(p))+" | depth "+esc(p.depth===""?"-":p.depth+" "+p.unit)+"</div></div>"+
+  if(!pipes.length)l.innerHTML="<div class='empty'>No pipes yet. Tap Draw pipe, trace the route, then fill in the details.</div>";
+  else if(!shown.length)l.innerHTML="<div class='empty'>No pipes match this filter.</div>";
+  else l.innerHTML=shown.slice().reverse().map(function(p){
+    return "<div class='row'><div class='sw' style='background:"+PAL[colorKey(p)].s+"'></div><div class='main'><div class='t'>"+esc(nodeName(p.n1))+" &rarr; "+esc(nodeName(p.n2))+"</div><div class='s'>"+esc(descPipe(p))+" | depth "+esc(p.depth===""?"-":p.depth+" "+p.unit)+"</div></div>"+
     "<button data-a='go' data-id='"+esc(p.id)+"' aria-label='Show on map'>Go</button><button data-a='ed' data-id='"+esc(p.id)+"' aria-label='Edit'>Edit</button><button data-a='rm' data-id='"+esc(p.id)+"' aria-label='Delete'>Del</button></div>";
   }).join("");
-  if(landmarks.length){
-    h+="<div class='sec'>Landmarks</div>"+landmarks.map(function(q){
-      var T=TYPES[q.type]||TYPES.other;
-      return "<div class='row'><div class='sw' style='background:"+T.color+"'></div><div class='main'><div class='t'>"+esc(q.title||T.label)+"</div><div class='s'>"+esc(T.full)+"</div></div>"+
-      "<button data-a='lgo' data-id='"+esc(q.id)+"' aria-label='Show on map'>Go</button><button data-a='led' data-id='"+esc(q.id)+"' aria-label='Edit'>Edit</button><button data-a='lrm' data-id='"+esc(q.id)+"' aria-label='Delete'>Del</button></div>";
-    }).join("");
-  }
-  l.innerHTML=h;
+  var lm=$("lmList");
+  if(!landmarks.length)lm.innerHTML="<div class='empty'>No landmarks yet. Tap Landmark on the map screen to add an OHSR, DPS, borewell and so on.</div>";
+  else lm.innerHTML=landmarks.map(function(q){
+    var T=TYPES[q.type]||TYPES.other;
+    return "<div class='row'><div class='sw' style='background:"+T.color+"'></div><div class='main'><div class='t'>"+esc(q.title||T.label)+"</div><div class='s'>"+esc(T.full)+"</div></div>"+
+    "<button data-a='lgo' data-id='"+esc(q.id)+"' aria-label='Show on map'>Go</button><button data-a='led' data-id='"+esc(q.id)+"' aria-label='Edit'>Edit</button><button data-a='lrm' data-id='"+esc(q.id)+"' aria-label='Delete'>Del</button></div>";
+  }).join("");
 }
+function showTab(t){
+  document.querySelectorAll("#sheetTabs button").forEach(function(b){b.classList.toggle("on",b.dataset.tab===t)});
+  document.querySelectorAll(".pane").forEach(function(p){p.classList.toggle("on",p.id==="pane-"+t)});
+}
+$("sheetTabs").addEventListener("click",function(e){var b=e.target.closest("button[data-tab]");if(b)showTab(b.dataset.tab)});
+$("fFilter").onchange=renderList;
+$("lmList").addEventListener("click",function(e){
+  var b=e.target.closest("button[data-a]");if(!b)return;
+  var id=b.dataset.id,act=b.dataset.a,lmk=landmarks.find(function(q){return q.id===id});if(!lmk)return;
+  if(act==="lgo"){$("sheet").classList.remove("open");map.setView([lmk.lat,lmk.lng],19)}
+  if(act==="led"){$("sheet").classList.remove("open");openLmForm(id)}
+  if(act==="lrm"){if(confirm("Delete landmark "+(lmk.title||TYPES[lmk.type].label)+"?")){landmarks=landmarks.filter(function(q){return q.id!==id});save();refreshAll()}}
+});
 $("list").addEventListener("click",function(e){
   var b=e.target.closest("button[data-a]");if(!b)return;
   var id=b.dataset.id,act=b.dataset.a;
@@ -1017,22 +1291,23 @@ function buildKml(){
   var out=['<?xml version="1.0" encoding="UTF-8"?>','<kml xmlns="http://www.opengis.net/kml/2.2"><Document>','<name>Village water pipelines</name>'];
   Object.keys(PAL).forEach(function(k){
     out.push('<Style id="c_'+k+'"><LineStyle><color>'+kmlColor(PAL[k].s)+'</color><width>4</width></LineStyle><LabelStyle><color>ffffffff</color><scale>0.9</scale></LabelStyle></Style>');
+    out.push('<Style id="p_'+k+'"><LineStyle><color>'+kmlColor(PAL[k].s)+'</color><width>7</width></LineStyle><LabelStyle><color>ffffffff</color><scale>0.9</scale></LabelStyle></Style>');
   });
   out.push('<Style id="node"><IconStyle><scale>0.6</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon></IconStyle><LabelStyle><color>ffffffff</color><scale>1</scale></LabelStyle></Style>');
-  ["existing","required"].forEach(function(s){
-    var g=pipes.filter(function(p){return p.status===s});if(!g.length)return;
-    out.push('<Folder><name>'+STATUS[s].label+' pipes</name>');
+  ["dist","pump"].forEach(function(k){["existing","required"].forEach(function(s){
+    var g=pipes.filter(function(p){return p.status===s&&p.kind===k});if(!g.length)return;
+    out.push('<Folder><name>'+STATUS[s].label+(k==="pump"?' pumping mains':' distribution pipes')+'</name>');
     g.forEach(function(p){
-      var depth=p.depth===""?"-":p.depth+" "+p.unit;
-      out.push('<Placemark><name>'+esc(labelText(p))+'</name><styleUrl>#c_'+colorKey(p)+'</styleUrl>'+
-        '<description><![CDATA[From node: '+esc(nodeName(p.n1))+'<br>To node: '+esc(nodeName(p.n2))+'<br>Status: '+STATUS[s].label+'<br>Diameter: '+p.dia+' inch<br>Length: '+Math.round(p.length)+' m<br>Depth: '+esc(depth)+']]></description>'+
-        '<ExtendedData><Data name="from_node"><value>'+esc(nodeName(p.n1))+'</value></Data><Data name="to_node"><value>'+esc(nodeName(p.n2))+'</value></Data><Data name="status"><value>'+STATUS[s].label+'</value></Data><Data name="dia_inch"><value>'+p.dia+'</value></Data><Data name="depth"><value>'+esc(depth)+'</value></Data><Data name="length_m"><value>'+Math.round(p.length)+'</value></Data></ExtendedData>'+
+      var depth=p.depth===""?"-":p.depth+" "+p.unit,mt=matLabel(p)||"not set";
+      out.push('<Placemark><name>'+esc(labelText(p))+'</name><styleUrl>#'+(k==="pump"?'p_':'c_')+colorKey(p)+'</styleUrl>'+
+        '<description><![CDATA[From node: '+esc(nodeName(p.n1))+'<br>To node: '+esc(nodeName(p.n2))+'<br>Type: '+KINDS[k].label+'<br>Status: '+STATUS[s].label+'<br>Material: '+esc(mt)+'<br>Diameter: '+p.dia+' mm ('+inchLabel(p.mat,p.dia)+' inch)<br>Length: '+Math.round(p.length)+' m<br>Depth: '+esc(depth)+']]></description>'+
+        '<ExtendedData><Data name="from_node"><value>'+esc(nodeName(p.n1))+'</value></Data><Data name="to_node"><value>'+esc(nodeName(p.n2))+'</value></Data><Data name="line_type"><value>'+KINDS[k].label+'</value></Data><Data name="status"><value>'+STATUS[s].label+'</value></Data><Data name="material"><value>'+esc(mt)+'</value></Data><Data name="dia_mm"><value>'+p.dia+'</value></Data><Data name="dia_inch"><value>'+inchLabel(p.mat,p.dia)+'</value></Data><Data name="depth"><value>'+esc(depth)+'</value></Data><Data name="length_m"><value>'+Math.round(p.length)+'</value></Data></ExtendedData>'+
         '<LineString><tessellate>1</tessellate><altitudeMode>clampToGround</altitudeMode><coordinates>'+
         p.coords.map(function(c){return c[1].toFixed(7)+","+c[0].toFixed(7)+",0"}).join(" ")+
         '</coordinates></LineString></Placemark>');
     });
     out.push('</Folder>');
-  });
+  })});
   if(landmarks.length){
     out.push('<Folder><name>Landmarks</name>');
     landmarks.forEach(function(q){
@@ -1055,14 +1330,14 @@ function csvCell(v){v=String(v==null?"":v);return /[",\n]/.test(v)?'"'+v.replace
 $("btnKml").onclick=function(){if(!pipes.length){toast("Nothing to export");return}download("pipelines_"+stamp()+".kml",buildKml(),"application/vnd.google-earth.kml+xml")};
 $("btnCsv").onclick=function(){
   if(!pipes.length){toast("Nothing to export");return}
-  var rows=[["No","From node","To node","Status","Dia (inch)","Length (m)","Depth","Depth unit","From lat","From lng","To lat","To lng"]];
+  var rows=[["No","From node","To node","Line type","Status","Material","Dia (mm)","Dia (inch)","Length (m)","Depth","Depth unit","From lat","From lng","To lat","To lng"]];
   pipes.forEach(function(p,i){
     var a=nodeById(p.n1),b=nodeById(p.n2);
-    rows.push([i+1,nodeName(p.n1),nodeName(p.n2),STATUS[p.status].label,p.dia,Math.round(p.length),p.depth,p.unit,a?a.lat.toFixed(6):"",a?a.lng.toFixed(6):"",b?b.lat.toFixed(6):"",b?b.lng.toFixed(6):""]);
+    rows.push([i+1,nodeName(p.n1),nodeName(p.n2),KINDS[p.kind].label,STATUS[p.status].label,matLabel(p),p.dia,inchLabel(p.mat,p.dia),Math.round(p.length),p.depth,p.unit,a?a.lat.toFixed(6):"",a?a.lng.toFixed(6):"",b?b.lat.toFixed(6):"",b?b.lng.toFixed(6):""]);
   });
   download("pipelines_"+stamp()+".csv","\ufeff"+rows.map(function(r){return r.map(csvCell).join(",")}).join("\n"),"text/csv");
 };
-$("btnJson").onclick=function(){download("pipelines_backup_"+stamp()+".json",JSON.stringify({v:2,pipes:pipes,nodes:nodes,landmarks:landmarks,prefix:prefix,next:nextNo,source:sourceId}),"application/json")};
+$("btnJson").onclick=function(){download("pipelines_backup_"+projName().replace(/[^A-Za-z0-9_-]+/g,"_")+"_"+stamp()+".json",JSON.stringify({v:3,name:projName(),pipes:pipes,nodes:nodes,landmarks:landmarks,prefix:prefix,next:nextNo,source:sourceId,hdr:hdrData}),"application/json")};
 $("btnImport").onclick=function(){$("fileIn").click()};
 $("fileIn").onchange=function(e){
   var f=e.target.files[0];if(!f)return;
@@ -1072,7 +1347,7 @@ $("fileIn").onchange=function(e){
       var data=JSON.parse(r.result);
       if(!Array.isArray(data)&&!(data&&Array.isArray(data.pipes)))throw 0;
       var n=Array.isArray(data)?data.length:data.pipes.length;
-      if(!confirm("Replace the pipes on this device with the "+n+" pipes in this backup?"))return;
+      if(!confirm("Replace everything in project \""+projName()+"\" with the "+n+" pipes in this backup?"))return;
       setState(data);save();refreshAll();
       if(pipes.length){var b=L.latLngBounds([]);pipes.forEach(function(p){p.coords.forEach(function(c){b.extend(c)})});map.fitBounds(b,{padding:[40,40],maxZoom:18})}
       toast("Backup restored");
@@ -1111,11 +1386,11 @@ function haloText(attrs,size,txt){
   return '<text '+attrs+' font-size="'+size+'" font-weight="700" fill="#fff" stroke="#fff" stroke-width="1.1" stroke-linejoin="round">'+txt+'</text>'+
          '<text '+attrs+' font-size="'+size+'" font-weight="700" fill="#111">'+txt+'</text>';
 }
-function getHdr(){var h={};try{h=JSON.parse(localStorage.getItem(HKEY)||"{}")||{}}catch(e){}return h}
+function getHdr(){return hdrData||{}}
 var viewBounds=null;
 function buildDrawing(){
   var hdr={title:$("pTitle").value,sub:$("pSub").value,by:$("pBy").value,nodes:$("pNodes").value,lbl:$("pLbl").value,font:$("pFont").value,line:$("pLine").value,dot:$("pDot").value,arrow:$("pArrow").value,lm:$("pLm").value,lmsz:$("pLmSize").value};
-  try{localStorage.setItem(HKEY,JSON.stringify(hdr))}catch(e){}
+  hdrData=hdr;save();
   var title=hdr.title.trim()||"Village Water Pipeline Map";
   var areaMode=$("pArea").value==="view"&&viewBounds?"view":"all";
 
@@ -1151,12 +1426,14 @@ function buildDrawing(){
       for(var k=1;k<pm.length;k++){if(segHitsRect(pm[k-1][0],pm[k-1][1],pm[k][0],pm[k][1],mx0,my0,mx1,my1))return true}
       return false;
     });
-    combos=[];totalLen=0;visCount=0;
-    ["existing","required"].forEach(function(st){DIAS.forEach(function(d){
-      var n=0,tl=0;pipes.forEach(function(p,i){if(vis[i]&&p.status===st&&p.dia===d){n++;tl+=p.length}});
-      if(n)combos.push({s:st,d:d,n:n,l:tl});
-    })});
-    pipes.forEach(function(p,i){if(vis[i]){totalLen+=p.length;visCount++}});
+    combos=[];totalLen=0;visCount=0;var cmap={};
+    pipes.forEach(function(p,i){
+      if(!vis[i])return;
+      var key=p.kind+"|"+p.status+"|"+(p.mat||"")+"|"+p.dia,c=cmap[key];
+      if(!c){c=cmap[key]={k:p.kind,s:p.status,m:p.mat||"",d:p.dia,n:0,l:0};combos.push(c)}
+      c.n++;c.l+=p.length;totalLen+=p.length;visCount++;
+    });
+    combos.sort(function(a,b){return (a.k===b.k?0:(a.k==="dist"?-1:1))||(a.s===b.s?0:(a.s==="existing"?-1:1))||(a.m<b.m?-1:a.m>b.m?1:0)||(a.d-b.d)});
   }
   lay(40);
   var need=Math.max(40,26+5*combos.length);if(need!==40)lay(need);
@@ -1255,8 +1532,8 @@ function buildDrawing(){
       pipes.forEach(function(p,i){
         if(!vis[i])return;
         var pm=pms[i],L=0;for(var k=1;k<pm.length;k++)L+=Math.hypot(pm[k][0]-pm[k-1][0],pm[k][1]-pm[k-1][1]);
-        var txt=lblMode==="len"?Math.round(p.length)+" m":p.dia+"\" | "+Math.round(p.length)+" m";
-        var hw=txt.length*f0*0.58/2+0.8,hh=f0*0.62,off=hh+(PWID[p.dia]||1)*lw/2+0.7,best=null;
+        var txt=lblMode==="len"?Math.round(p.length)+" m":labelText(p);
+        var hw=txt.length*f0*0.58/2+0.8,hh=f0*0.62,off=hh+pw(p)*lw/2+0.7,best=null;
         function consider(res,x,y,a,ld){if(!best||res.s<best.s)best={s:res.s,poly:res.poly,x:x,y:y,a:a,ld:ld}}
         [0.5,0.4,0.6,0.3,0.7,0.2,0.8,0.12,0.88].forEach(function(t){
           var m=alongPts(pm,L*t),ang=m.a;if(ang>90)ang-=180;if(ang<-90)ang+=180;
@@ -1307,7 +1584,7 @@ function buildDrawing(){
   pipes.forEach(function(p,i){
     if(!vis[i])return;
     var pm=pms[i];
-    pipeOut.push('<polyline points="'+pm.map(function(q){return f2(q[0])+","+f2(q[1])}).join(" ")+'" fill="none" stroke="'+PAL[colorKey(p)].p+'" stroke-width="'+f2((PWID[p.dia]||1)*lw)+'" stroke-linejoin="round"/>');
+    pipeOut.push('<polyline points="'+pm.map(function(q){return f2(q[0])+","+f2(q[1])}).join(" ")+'" fill="none" stroke="'+PAL[colorKey(p)].p+'" stroke-width="'+f2(pw(p)*lw)+'"'+(p.kind==="pump"?' stroke-dasharray="'+f2(4*Math.max(lw,0.6))+' '+f2(2.4*Math.max(lw,0.6))+'"':'')+' stroke-linejoin="round"/>');
     if(!showArrows)return;
     var L=0;for(var k=1;k<pm.length;k++)L+=Math.hypot(pm[k][0]-pm[k-1][0],pm[k][1]-pm[k-1][1]);
     if(L>6){
@@ -1326,13 +1603,13 @@ function buildDrawing(){
   /* footer summary */
   out.push('<line x1="'+M+'" y1="'+fy+'" x2="'+(W-M)+'" y2="'+fy+'" stroke="#000" stroke-width="0.4"/>');
   out.push('<text x="'+(M+4)+'" y="'+(fy+6)+'" font-size="3.6" font-weight="700" fill="#111">Pipe summary'+(areaMode==="view"?" (this sheet)":"")+'</text>');
-  var X1=M+4,X2=M+17,X3=M+72,X4=M+104,ry=fy+12;
-  out.push('<text x="'+X2+'" y="'+ry+'" font-size="2.9" font-weight="700" fill="#333">Status | Diameter</text><text x="'+X3+'" y="'+ry+'" font-size="2.9" font-weight="700" text-anchor="end" fill="#333">Pipes</text><text x="'+X4+'" y="'+ry+'" font-size="2.9" font-weight="700" text-anchor="end" fill="#333">Length (m)</text>');
+  var X1=M+4,X2=M+17,X3=M+80,X4=M+110,ry=fy+12;
+  out.push('<text x="'+X2+'" y="'+ry+'" font-size="2.9" font-weight="700" fill="#333">Line | Material | Size</text><text x="'+X3+'" y="'+ry+'" font-size="2.9" font-weight="700" text-anchor="end" fill="#333">Pipes</text><text x="'+X4+'" y="'+ry+'" font-size="2.9" font-weight="700" text-anchor="end" fill="#333">Length (m)</text>');
   out.push('<line x1="'+X1+'" y1="'+(ry+1.5)+'" x2="'+(X4+1)+'" y2="'+(ry+1.5)+'" stroke="#999" stroke-width="0.2"/>');
   ry+=5.5;
   combos.forEach(function(c){
-    out.push('<line x1="'+X1+'" y1="'+(ry-1)+'" x2="'+(X1+10)+'" y2="'+(ry-1)+'" stroke="'+PAL[STATUS[c.s].key].p+'" stroke-width="'+(PWID[c.d]*1.4)+'"/>');
-    out.push('<text x="'+X2+'" y="'+ry+'" font-size="3.2" fill="#111">'+STATUS[c.s].label+' | '+c.d+'&quot; dia</text><text x="'+X3+'" y="'+ry+'" font-size="3.2" text-anchor="end" fill="#111">'+c.n+'</text><text x="'+X4+'" y="'+ry+'" font-size="3.2" text-anchor="end" fill="#111">'+Math.round(c.l)+'</text>');
+    out.push('<line x1="'+X1+'" y1="'+(ry-1)+'" x2="'+(X1+10)+'" y2="'+(ry-1)+'" stroke="'+PAL[STATUS[c.s].key].p+'" stroke-width="'+f2(pw({dia:c.d,kind:c.k})*1.3)+'"'+(c.k==="pump"?' stroke-dasharray="2.6 1.6"':'')+'/>');
+    out.push('<text x="'+X2+'" y="'+ry+'" font-size="3.2" fill="#111">'+esc(STATUS[c.s].label+(c.k==="pump"?" pumping":"")+" | "+(c.m?MATS[c.m].label+" ":"")+diaText({mat:c.m,dia:c.d}))+'</text><text x="'+X3+'" y="'+ry+'" font-size="3.2" text-anchor="end" fill="#111">'+c.n+'</text><text x="'+X4+'" y="'+ry+'" font-size="3.2" text-anchor="end" fill="#111">'+Math.round(c.l)+'</text>');
     ry+=5;
   });
   out.push('<line x1="'+X1+'" y1="'+(ry-3.6)+'" x2="'+(X4+1)+'" y2="'+(ry-3.6)+'" stroke="#999" stroke-width="0.2"/>');
@@ -1341,7 +1618,7 @@ function buildDrawing(){
   /* landmark legend */
   if(vlm.length){
     var usedT={};vlm.forEach(function(o){usedT[o.l.type]=1});
-    var lx=M+112;
+    var lx=M+118;
     out.push('<text x="'+lx+'" y="'+(fy+6)+'" font-size="3.6" font-weight="700" fill="#111">Landmarks</text>');
     Object.keys(TYPES).filter(function(k){return usedT[k]}).forEach(function(k,i){
       var yy=fy+12+i*5;
@@ -1365,6 +1642,11 @@ function buildDrawing(){
   $("pStage").innerHTML=out.join("\n");
   var pv=$("printView");pv.style.setProperty("--pw",W+"mm");pv.style.setProperty("--ph",H+"mm");
   $("pageStyle").textContent="@page{size:"+paper+" "+o+";margin:0}";
+  pageW=W;pageH=H;applyZoom();
+  var ratio=res.f/(fs0*fm0),parts=[paper+" "+o,visCount+" pipe"+(visCount===1?"":"s")];
+  if(ratio<0.99)parts.push("text reduced to "+Math.round(ratio*100)+"% to avoid overlaps");
+  if(res.bad>0)parts.push(res.bad+" label"+(res.bad>1?"s":"")+" may overlap something or sit at the page edge. Try the Dense area preset, A3 paper or a smaller area.");
+  $("pInfo").textContent=parts.join(" | ");
 }
 function openPrint(bounds,areaVal){
   if(!pipes.length){toast("Draw some pipes first");return}
@@ -1373,6 +1655,7 @@ function openPrint(bounds,areaVal){
   var h=getHdr();$("pTitle").value=h.title||"";$("pSub").value=h.sub||"";$("pBy").value=h.by||"";
   if(h.nodes)$("pNodes").value=h.nodes;if(h.lbl)$("pLbl").value=h.lbl;if(h.font)$("pFont").value=h.font;if(h.line)$("pLine").value=h.line;if(h.arrow)$("pArrow").value=h.arrow;if(h.lm)$("pLm").value=h.lm;if(h.lmsz)$("pLmSize").value=h.lmsz;if(h.dot)$("pDot").value=h.dot;
   $("pArea").value=areaVal||"all";
+  pz=1;renderPresets();
   $("printView").classList.add("open");
   buildDrawing();
 }
@@ -1419,14 +1702,179 @@ mapBox.addEventListener("pointerup",function(e){
 mapBox.addEventListener("pointercancel",function(e){if(e.pointerId===selId){selId=null;if(selRect){map.removeLayer(selRect);selRect=null}}});
 $("btnSelCancel").onclick=endSelect;
 $("pPick").onclick=function(){$("printView").classList.remove("open");startSelect()};
+var pz=1,pageW=297,pageH=210;
+function applyZoom(){
+  var st=$("pStage"),sv=st.querySelector("svg");if(!sv)return;
+  var cw=st.clientWidth-20,ch=st.clientHeight-20;
+  var fit=(cw>0&&ch>0)?Math.min(cw,ch*pageW/pageH):300;
+  sv.style.width=Math.max(160,Math.round(fit*pz))+"px";
+}
+$("pZoomIn").onclick=function(){pz=Math.min(5,pz*1.4);applyZoom()};
+$("pZoomOut").onclick=function(){pz=Math.max(0.5,pz/1.4);applyZoom()};
+$("pZoomFit").onclick=function(){pz=1;applyZoom();$("pStage").scrollTop=0;$("pStage").scrollLeft=0};
+window.addEventListener("resize",applyZoom);
+$("pGrip").onclick=function(){
+  var open=$("pBody").style.display==="none";
+  $("pBody").style.display=open?"block":"none";
+  $("pGrip").setAttribute("aria-expanded",open?"true":"false");
+  $("pArrowIc").innerHTML=open?"&#9660;":"&#9650;";
+  setTimeout(applyZoom,0);
+};
+$("pTabs").addEventListener("click",function(e){
+  var b=e.target.closest("button[data-pt]");if(!b)return;
+  document.querySelectorAll("#pTabs button").forEach(function(x){x.classList.toggle("on",x===b)});
+  document.querySelectorAll(".ppane").forEach(function(p){p.classList.toggle("on",p.dataset.pp===b.dataset.pt)});
+});
+var PRESET_IDS=["pNodes","pLbl","pFont","pLine","pDot","pArrow","pLm","pLmSize"];
+var BUILTIN={
+  standard:{name:"Standard",o:{pNodes:"names",pLbl:"both",pFont:"1",pLine:"1",pDot:"0.8",pArrow:"on",pLm:"on",pLmSize:"1"}},
+  dense:{name:"Dense area",o:{pNodes:"names",pLbl:"len",pFont:"0.6",pLine:"0.65",pDot:"0.5",pArrow:"off",pLm:"on",pLmSize:"0.7"}},
+  overview:{name:"Overview",o:{pNodes:"none",pLbl:"none",pFont:"1",pLine:"0.65",pDot:"0.5",pArrow:"off",pLm:"on",pLmSize:"1"}},
+  hand:{name:"Number by hand",o:{pNodes:"circles",pLbl:"both",pFont:"1",pLine:"1",pDot:"0.8",pArrow:"on",pLm:"on",pLmSize:"1"}}
+};
+function applyOpts(o){PRESET_IDS.forEach(function(id){if(o[id]!==undefined)$(id).value=o[id]});buildDrawing()}
+function renderPresets(){
+  var h="";
+  Object.keys(BUILTIN).forEach(function(k){h+='<button data-pre="b:'+k+'">'+BUILTIN[k].name+'</button>'});
+  settings.presets.forEach(function(p,i){h+='<span class="pchip"><button data-pre="c:'+i+'">'+esc(p.name)+'</button><button class="px" data-pdel="'+i+'" aria-label="Delete preset '+esc(p.name)+'">&times;</button></span>'});
+  h+='<button class="psave" data-pre="save">+ Save current</button>';
+  $("pPresets").innerHTML=h;
+}
+$("pPresets").addEventListener("click",function(e){
+  var d=e.target.closest("button[data-pdel]");
+  if(d){settings.presets.splice(parseInt(d.dataset.pdel,10),1);saveSettings();renderPresets();return}
+  var b=e.target.closest("button[data-pre]");if(!b)return;
+  var v=b.dataset.pre;
+  if(v==="save"){
+    var name=prompt("Name for this set of print options:","");
+    if(name===null||!name.trim())return;
+    var o={};PRESET_IDS.forEach(function(id){o[id]=$(id).value});
+    settings.presets.push({name:name.trim(),o:o});saveSettings();renderPresets();toast("Preset saved");return;
+  }
+  var parts=v.split(":");
+  applyOpts(parts[0]==="b"?BUILTIN[parts[1]].o:settings.presets[parseInt(parts[1],10)].o);
+});
 $("pClose").onclick=function(){$("printView").classList.remove("open")};
 $("pTitle").oninput=buildDrawing;$("pSub").oninput=buildDrawing;$("pBy").oninput=buildDrawing;
 $("pPaper").onchange=buildDrawing;$("pLm").onchange=buildDrawing;$("pLmSize").onchange=buildDrawing;$("pArea").onchange=buildDrawing;$("pArrow").onchange=buildDrawing;$("pNodes").onchange=buildDrawing;$("pLbl").onchange=buildDrawing;$("pFont").onchange=buildDrawing;$("pLine").onchange=buildDrawing;$("pDot").onchange=buildDrawing;$("pOrient").onchange=buildDrawing;
 $("pPrint").onclick=function(){buildDrawing();setTimeout(function(){window.print()},150)};
 
+
+/* ---------- sign-in ---------- */
+function sha256(str){
+  var ascii=unescape(encodeURIComponent(String(str)));
+  function rr(v,a){return (v>>>a)|(v<<(32-a))}
+  var mp=Math.pow,mw=mp(2,32),i,j,result="",words=[],bl=ascii.length*8;
+  var hash=sha256.h=sha256.h||[],k=sha256.k=sha256.k||[],pc=k.length,comp={};
+  for(var c=2;pc<64;c++){
+    if(!comp[c]){
+      for(i=0;i<313;i+=c)comp[i]=c;
+      hash[pc]=(mp(c,.5)*mw)|0;
+      k[pc++]=(mp(c,1/3)*mw)|0;
+    }
+  }
+  ascii+="\x80";
+  while(ascii.length%64-56)ascii+="\x00";
+  for(i=0;i<ascii.length;i++){
+    j=ascii.charCodeAt(i);
+    words[i>>2]|=j<<((3-i)%4)*8;
+  }
+  words[words.length]=((bl/mw)|0);
+  words[words.length]=(bl);
+  for(j=0;j<words.length;){
+    var w=words.slice(j,j+=16),old=hash;
+    hash=hash.slice(0,8);
+    for(i=0;i<64;i++){
+      var w15=w[i-15],w2=w[i-2],a=hash[0],e=hash[4];
+      var t1=hash[7]+(rr(e,6)^rr(e,11)^rr(e,25))+((e&hash[5])^((~e)&hash[6]))+k[i]+(w[i]=(i<16)?w[i]:(w[i-16]+(rr(w15,7)^rr(w15,18)^(w15>>>3))+w[i-7]+(rr(w2,17)^rr(w2,19)^(w2>>>10)))|0);
+      var t2=(rr(a,2)^rr(a,13)^rr(a,22))+((a&hash[1])^(a&hash[2])^(hash[1]&hash[2]));
+      hash=[(t1+t2)|0].concat(hash);
+      hash[4]=(hash[4]+t1)|0;
+    }
+    for(i=0;i<8;i++)hash[i]=(hash[i]+old[i])|0;
+  }
+  for(i=0;i<8;i++)for(j=3;j+1;j--){var b=(hash[i]>>(j*8))&255;result+=((b<16)?0:"")+b.toString(16)}
+  return result;
+}
+function derive(salt,pw,iter){var h=sha256(salt+":"+pw),i;for(i=1;i<iter;i++)h=sha256(h+salt);return h}
+var AUTH_URL="auth.json",SES_KEY="pipeline-mapper-session",AC_KEY="pipeline-mapper-authcache",LK_KEY="pipeline-mapper-lock";
+var authCfg=null;
+function readJSON(k){try{return JSON.parse(localStorage.getItem(k)||"null")}catch(e){return null}}
+function okCfg(j){return !!j&&(j.enabled===false||(!!j.user&&!!j.salt&&!!j.hash))}
+function fetchAuth(cb){
+  var done=false;
+  function fallback(){if(done)return;done=true;var c=readJSON(AC_KEY);cb(okCfg(c)?c:null,"cache")}
+  if(typeof fetch!=="function"){fallback();return}
+  fetch(AUTH_URL+"?t="+Date.now(),{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("http");return r.json()}).then(function(j){
+    if(done)return;
+    if(!okCfg(j))throw new Error("bad");
+    done=true;try{localStorage.setItem(AC_KEY,JSON.stringify(j))}catch(e){}
+    cb(j,"online");
+  }).catch(fallback);
+}
+function readSession(){var s=readJSON(SES_KEY);return s&&s.exp>Date.now()?s:null}
+function lockUI(msg){
+  $("loginView").style.display="flex";$("lMsg").textContent=msg||"";
+  setTimeout(function(){try{$("lUser").focus()}catch(e){}},50);
+}
+function unlockUI(){$("loginView").style.display="none";setTimeout(function(){map.invalidateSize()},50)}
+function updAccount(){
+  var off=authCfg&&authCfg.enabled===false,s=readSession();
+  $("acctName").textContent=off?"Sign-in is turned off for this app.":(s?"Signed in as "+s.user:"Not signed in");
+  $("btnSignOut").style.display=off?"none":"block";
+}
+function startAuth(){
+  fetchAuth(function(cfg){
+    authCfg=cfg;
+    if(cfg&&cfg.enabled===false){unlockUI();updAccount();return}
+    var s=readSession();
+    if(s&&(!cfg||s.hash===cfg.hash)){unlockUI();updAccount();return}
+    if(s&&cfg){try{localStorage.removeItem(SES_KEY)}catch(e){}lockUI("The password was changed. Please sign in again.");updAccount();return}
+    lockUI(cfg?"":"Cannot load the sign-in settings. Connect to the internet and try again.");updAccount();
+  });
+}
+$("lShow").onclick=function(){
+  var f=$("lPass"),show=f.type==="password";
+  f.type=show?"text":"password";$("lShow").textContent=show?"Hide":"Show";
+  $("lShow").setAttribute("aria-label",show?"Hide password":"Show password");
+};
+$("lForm").onsubmit=function(e){
+  e.preventDefault();
+  var lk=readJSON(LK_KEY)||{fails:0,until:0};
+  if(lk.until>Date.now()){$("lMsg").textContent="Too many attempts. Try again in "+Math.ceil((lk.until-Date.now())/1000)+" seconds.";return}
+  var u=$("lUser").value.trim().toLowerCase(),p=$("lPass").value;
+  if(!u||!p){$("lMsg").textContent="Enter your username and password.";return}
+  $("lBtn").disabled=true;$("lBtn").textContent="Checking...";$("lMsg").textContent="";
+  fetchAuth(function(cfg){
+    setTimeout(function(){
+      $("lBtn").disabled=false;$("lBtn").textContent="Sign in";
+      if(!cfg){$("lMsg").textContent="Cannot load the sign-in settings. Check your internet connection.";return}
+      authCfg=cfg;
+      if(cfg.enabled===false){unlockUI();updAccount();return}
+      var ok=String(cfg.user).toLowerCase()===u&&derive(cfg.salt,p,cfg.iter||3000)===cfg.hash;
+      if(ok){
+        try{localStorage.setItem(SES_KEY,JSON.stringify({user:cfg.user,hash:cfg.hash,exp:Date.now()+(cfg.days||30)*86400000}));localStorage.removeItem(LK_KEY)}catch(x){}
+        $("lPass").value="";unlockUI();updAccount();toast("Signed in as "+cfg.user);
+      }else{
+        lk.fails=(lk.fails||0)+1;if(lk.fails>=5){lk.until=Date.now()+60000;lk.fails=0}
+        try{localStorage.setItem(LK_KEY,JSON.stringify(lk))}catch(x){}
+        $("lMsg").textContent="Wrong username or password.";$("lPass").value="";$("lPass").focus();
+      }
+    },30);
+  });
+};
+$("btnSignOut").onclick=function(){
+  if(!confirm("Sign out? Your projects stay saved on this phone."))return;
+  try{localStorage.removeItem(SES_KEY)}catch(e){}
+  $("sheet").classList.remove("open");$("lUser").value="";$("lPass").value="";
+  lockUI("");updAccount();
+};
+window.addEventListener("online",startAuth);
+
 /* ---------- start ---------- */
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
 if(location.protocol!=="https:"&&location.hostname!=="localhost"){setTimeout(function(){toast("Open this page from https (GitHub Pages) so GPS and saving work")},800)}
+startAuth();
 refreshAll();
 if(pipes.length){var bb=L.latLngBounds([]);pipes.forEach(function(p){p.coords.forEach(function(c){bb.extend(c)})});map.fitBounds(bb,{padding:[40,40],maxZoom:18})}
 })();
