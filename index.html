@@ -139,6 +139,18 @@ input[type=text],input[type=number],select{width:100%;min-height:46px;border-rad
 .tbody p{margin:0}
 .tchk{display:flex;gap:10px;align-items:flex-start;margin:14px 0 4px;font-size:14px;color:var(--text);cursor:pointer}
 .tchk input{width:22px;height:22px;min-height:0;margin:0;flex:none;accent-color:var(--accent)}
+.sbar{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:10px;right:10px;z-index:1200}
+.sbar form{display:flex;gap:6px;background:rgba(16,22,26,.97);border:1px solid var(--line);border-radius:14px;padding:6px}
+.sbar input{flex:1;min-width:0;min-height:44px;border:none;background:transparent;color:var(--text);font-size:16px;padding:0 10px;outline:none}
+.sbar button{min-height:44px;min-width:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-weight:700;font-size:14px;padding:0 12px}
+.sbar .sgo{background:var(--accent);color:#06281a;border-color:var(--accent)}
+.sres{display:none;margin-top:6px;background:rgba(16,22,26,.98);border:1px solid var(--line);border-radius:14px;max-height:55vh;overflow:auto}
+.sres .it{padding:10px 14px;border-top:1px solid var(--line);min-height:48px;cursor:pointer}
+.sres .it:first-child{border-top:none}
+.sres .it b{display:block;font-size:14px}
+.sres .it span{font-size:12px;color:var(--muted)}
+.sres .note2{padding:8px 14px;font-size:11px;color:var(--muted);border-top:1px solid var(--line)}
+.leaflet-bar a#btnSearch{display:flex;align-items:center;justify-content:center}
 .acct{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:10px;z-index:1050}
 .achip{display:flex;align-items:center;gap:8px;min-height:44px;max-width:190px;padding:0 14px 0 6px;border-radius:999px;border:1px solid var(--line);background:rgba(16,22,26,.92);color:var(--text);font-weight:700;font-size:13px}
 .achip span.n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -192,6 +204,14 @@ input[type=text],input[type=number],select{width:100%;min-height:46px;border-rad
     <button id="apTerms">Read first (terms)</button>
     <button id="apOut" class="out">Sign out</button>
   </div>
+</div>
+<div class="sbar" id="sbar" style="display:none">
+  <form id="sForm" role="search">
+    <input type="search" id="sInput" placeholder="Search a place, or type lat, lng" enterkeyhint="search" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="Search places">
+    <button type="submit" class="sgo" aria-label="Search">Go</button>
+    <button type="button" id="sClose" aria-label="Close search">&times;</button>
+  </form>
+  <div class="sres" id="sRes"></div>
 </div>
 <div class="hint" id="hint"></div>
 
@@ -723,6 +743,15 @@ var esri=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World
 var osm=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:21,maxNativeZoom:19,attribution:"&copy; OpenStreetMap"});
 L.control.layers({"Google satellite + names":gHybrid,"Google satellite":gSat,"Esri satellite":esri,"Street":osm},{},{position:"topleft"}).addTo(map);
 L.control.zoom({position:"topleft"}).addTo(map);
+var SearchCtl=L.Control.extend({options:{position:"topleft"},onAdd:function(){
+  var c=L.DomUtil.create("div","leaflet-bar"),a=L.DomUtil.create("a","",c);
+  a.href="#";a.id="btnSearch";a.title="Search places";a.setAttribute("role","button");a.setAttribute("aria-label","Search places");
+  a.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="M15 15l6 6"/></svg>';
+  L.DomEvent.disableClickPropagation(c);
+  L.DomEvent.on(a,"click",function(e){L.DomEvent.preventDefault(e)});
+  return c;
+}});
+new SearchCtl().addTo(map);
 var GpsCtl=L.Control.extend({options:{position:"topleft"},onAdd:function(){
   var c=L.DomUtil.create("div","leaflet-bar"),a=L.DomUtil.create("a","",c);
   a.href="#";a.id="btnGps";a.title="My location";a.setAttribute("role","button");a.setAttribute("aria-label","My location");a.innerHTML="&#9678;";
@@ -953,6 +982,87 @@ $("btnFinish").onclick=function(){
   if(pts.length<2){toast("Add at least 2 points");return}
   openForm(null);
 };
+
+/* ---------- place search ---------- */
+var searchLayer=L.layerGroup().addTo(map),lastSearch=0,SR_KEY="pipeline-mapper-recent";
+function recentGet(){var r=readJSON(SR_KEY);return Array.isArray(r)?r:[]}
+function recentAdd(it){
+  var r=recentGet().filter(function(x){return x.name!==it.name});r.unshift(it);
+  try{localStorage.setItem(SR_KEY,JSON.stringify(r.slice(0,5)))}catch(e){}
+}
+function parseCoords(q){
+  var m=q.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/)||q.match(/[?&](?:q|ll)=(-?\d+\.?\d*),(-?\d+\.?\d*)/),a,b;
+  if(m){a=parseFloat(m[1]);b=parseFloat(m[2])}
+  else{
+    var t=q.replace(/\u00b0/g," ").replace(/,/g," ").replace(/\s+/g," ").trim();
+    var r=t.match(/^(-?\d+(?:\.\d+)?)\s*([NSns])?\s+(-?\d+(?:\.\d+)?)\s*([EWew])?$/);
+    if(!r)return null;
+    a=parseFloat(r[1]);b=parseFloat(r[3]);
+    if(/s/i.test(r[2]||""))a=-Math.abs(a);
+    if(/w/i.test(r[4]||""))b=-Math.abs(b);
+  }
+  if(!isFinite(a)||!isFinite(b)||Math.abs(a)>90||Math.abs(b)>180)return null;
+  return [a,b];
+}
+function openSearch(){
+  $("sbar").style.display="block";$("apop").classList.remove("open");
+  setTimeout(function(){$("sInput").focus()},30);showRecent();
+}
+function closeSearch(){$("sbar").style.display="none";$("sRes").style.display="none";$("sInput").blur()}
+function showRecent(){
+  var h="",r=recentGet();
+  if(searchLayer.getLayers().length)h+='<div class="it" data-sr="clear"><b>Remove search pin</b></div>';
+  r.forEach(function(x,i){h+='<div class="it" data-sr="r'+i+'"><b>'+esc(x.name)+'</b><span>Recent</span></div>'});
+  if(!h){$("sRes").style.display="none";return}
+  $("sRes").innerHTML=h;$("sRes").style.display="block";
+}
+function goTo(lat,lng,label,bbox){
+  searchLayer.clearLayers();
+  L.marker([lat,lng],{interactive:false,keyboard:false,zIndexOffset:700,icon:L.divIcon({className:"lmic",html:'<svg width="34" height="34" viewBox="-3.4 -3.4 6.8 6.8"><circle r="2.4" fill="rgba(255,23,68,.18)" stroke="#fff" stroke-width="0.7"/><circle r="2.4" fill="none" stroke="#ff1744" stroke-width="0.35"/><circle r="0.75" fill="#ff1744"/></svg><b>'+esc(label)+'</b>',iconSize:[0,0]})}).addTo(searchLayer);
+  if(bbox)map.fitBounds(bbox,{maxZoom:18,padding:[30,30]});else map.setView([lat,lng],18);
+  recentAdd({name:label,lat:lat,lng:lng});
+  closeSearch();
+}
+var lastResults=[];
+function runSearch(q){
+  var c=parseCoords(q);
+  if(c){goTo(c[0],c[1],c[0].toFixed(5)+", "+c[1].toFixed(5));return}
+  if(Date.now()-lastSearch<1200){toast("One moment, then search again");return}
+  lastSearch=Date.now();
+  $("sRes").style.display="block";$("sRes").innerHTML='<div class="it"><span>Searching...</span></div>';
+  var b=map.getBounds();
+  var url="https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&accept-language=en&q="+encodeURIComponent(q)+"&viewbox="+[b.getWest()-1,b.getNorth()+1,b.getEast()+1,b.getSouth()-1].join(",");
+  if(typeof fetch!=="function"){$("sRes").innerHTML='<div class="it"><span>Search is not available in this browser.</span></div>';return}
+  fetch(url).then(function(r){if(!r.ok)throw new Error("http");return r.json()}).then(function(list){
+    lastResults=list||[];
+    if(!lastResults.length){$("sRes").innerHTML='<div class="it"><b>No results</b><span>Try a nearby town, add the mandal or district, or type coordinates like 16.5062, 80.6480.</span></div>';return}
+    $("sRes").innerHTML=lastResults.map(function(x,i){
+      var parts=String(x.display_name||"").split(","),first=parts[0]||"Place";
+      return '<div class="it" data-sr="s'+i+'"><b>'+esc(first)+'</b><span>'+esc(parts.slice(1,4).join(",").trim())+'</span></div>';
+    }).join("")+'<div class="note2">Results from OpenStreetMap (Nominatim)</div>';
+  }).catch(function(){
+    $("sRes").innerHTML='<div class="it"><b>Cannot search right now</b><span>Search needs internet. You can still type coordinates like 16.5062, 80.6480.</span></div>';
+  });
+}
+$("btnSearch").onclick=function(){if($("sbar").style.display==="none")openSearch();else closeSearch()};
+$("sClose").onclick=closeSearch;
+$("sForm").onsubmit=function(e){
+  e.preventDefault();
+  var q=$("sInput").value.trim();
+  if(!q){showRecent();return}
+  runSearch(q);
+};
+$("sInput").addEventListener("input",function(){if(!$("sInput").value.trim())showRecent()});
+$("sRes").addEventListener("click",function(e){
+  var it=e.target.closest("[data-sr]");if(!it)return;
+  var k=it.dataset.sr;
+  if(k==="clear"){searchLayer.clearLayers();closeSearch();return}
+  if(k.charAt(0)==="r"){var x=recentGet()[parseInt(k.slice(1),10)];if(x)goTo(x.lat,x.lng,x.name);return}
+  var r=lastResults[parseInt(k.slice(1),10)];if(!r)return;
+  var lat=parseFloat(r.lat),lng=parseFloat(r.lon),bb=r.boundingbox,bbox=null;
+  if(bb&&bb.length===4){var s0=parseFloat(bb[0]),n0=parseFloat(bb[1]),w0=parseFloat(bb[2]),e0=parseFloat(bb[3]);if(isFinite(s0+n0+w0+e0))bbox=[[s0,w0],[n0,e0]]}
+  goTo(lat,lng,String(r.display_name||"").split(",")[0]||"Place",bbox);
+});
 
 /* ---------- move nodes and landmarks ---------- */
 var adjusting=false,adjLayer=L.layerGroup(),undoStack=[];
